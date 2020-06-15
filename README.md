@@ -1,5 +1,5 @@
 # Alarm
-这个是给[hyperf](https://github.com/hyperf/hyperf "hyperf")框架开发的告警组件。
+这个是一个基于[hyperf](https://github.com/hyperf/hyperf "hyperf")的告警组件。
 
 支持发送告警到钉钉群机器人和企业微信群机器人。
 
@@ -10,11 +10,7 @@
 
 ## 安装
 
-**下载包**
-
-```bash
-composer require buexplain/alarm "dev-master"
-```
+**下载包** `composer require buexplain/alarm "dev-master"`
 
 **发布告警组件的配置** `php bin/hyperf.php vendor:publish buexplain/alarm`
 

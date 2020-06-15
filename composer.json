@@ -38,8 +38,12 @@
     }
   },
   "scripts": {
-    "cs-fix": "php-cs-fixer fix ./src",
-    "test": "phpunit -c phpunit.xml --colors=always"
+    "cs-fix": "php-cs-fixer fix ./src"
+  },
+  "extra": {
+    "hyperf": {
+      "config": "Alarm\\ConfigProvider"
+    }
   },
   "repositories": {
     "packagist": {
