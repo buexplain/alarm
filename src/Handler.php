@@ -8,6 +8,7 @@ use Alarm\Contract\AlarmInterface;
 use Alarm\Exception\InvalidConfigException;
 use Monolog\Handler\AbstractHandler;
 use Monolog\Logger;
+use Closure;
 
 /**
  * Class Handler
@@ -16,7 +17,7 @@ use Monolog\Logger;
 class Handler extends AbstractHandler
 {
     /**
-     * @var AlarmInterface
+     * @var Closure|AlarmInterface
      */
     protected $alarm;
 
@@ -27,14 +28,20 @@ class Handler extends AbstractHandler
 
     /**
      * Handler constructor.
-     * @param AlarmInterface $alarm
+     * @param Closure|AlarmInterface $alarm
      * @param array $handlers
      * @param int $level
      */
-    public function __construct(AlarmInterface $alarm, array $handlers, $level=Logger::DEBUG)
+    public function __construct($alarm, array $handlers, $level=Logger::DEBUG)
     {
         //此处强制为true，因为接下来的逻辑可能会丢失日志
         parent::__construct($level, true);
+        if ($alarm instanceof Closure) {
+            $alarm = $alarm();
+        }
+        if (!($alarm instanceof AlarmInterface)) {
+            throw new InvalidConfigException(sprintf('Parameter $alarm of %s is invalid.', __CLASS__.'::'.__FUNCTION__));
+        }
         if (empty($handlers)) {
             throw new InvalidConfigException(sprintf('Parameter $handlers of %s is invalid.', __CLASS__.'::'.__FUNCTION__));
         }

@@ -6,8 +6,6 @@ namespace Alarm;
 
 use Alarm\Contract\AlarmInterface;
 use Alarm\Handler\HandlerFactory;
-use Hyperf\Contract\StdoutLoggerInterface;
-use Hyperf\ExceptionHandler\Formatter\FormatterInterface;
 use Hyperf\Process\Exception\SocketAcceptException;
 use Hyperf\Process\ProcessCollector;
 use Psr\Container\ContainerInterface;
@@ -191,9 +189,9 @@ class Alarm implements AlarmInterface
      */
     protected function logThrowable(Throwable $throwable): void
     {
-        if ($this->container->has(StdoutLoggerInterface::class) && $this->container->has(FormatterInterface::class)) {
-            $logger = $this->container->get(StdoutLoggerInterface::class);
-            $formatter = $this->container->get(FormatterInterface::class);
+        if ($this->container->has(\Hyperf\Contract\StdoutLoggerInterface::class) && $this->container->has(\Hyperf\ExceptionHandler\Formatter\FormatterInterface::class)) {
+            $logger = $this->container->get(\Hyperf\Contract\StdoutLoggerInterface::class);
+            $formatter = $this->container->get(\Hyperf\ExceptionHandler\Formatter\FormatterInterface::class);
             $logger->error($formatter->format($throwable));
             if ($throwable instanceof SocketAcceptException) {
                 $logger->critical('Socket of process is unavailable, please restart the server');

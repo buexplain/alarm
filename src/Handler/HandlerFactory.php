@@ -39,14 +39,14 @@ class HandlerFactory
         if (!$class) {
             $config = (array) $this->config->get('alarm', []);
             if (!isset($config[$name])) {
-                throw new InvalidConfigException(sprintf('Alarm config[%s] is not defined.', $name));
+                throw new InvalidConfigException(sprintf('Alarm config[\'%s\'] is not defined.', $name));
             }
             if (!isset($config[$name]['class'])) {
-                throw new InvalidConfigException(sprintf('Alarm config[%s][\'class\'] is not defined.', $name));
+                throw new InvalidConfigException(sprintf('Alarm config[\'%s\'][\'class\'] is not defined.', $name));
             }
             $class = make($config[$name]['class'], isset($config[$name]['constructor']) ? $config[$name]['constructor'] : []);
             if (!($class instanceof HandlerInterface)) {
-                throw new InvalidConfigException(sprintf('Alarm config[%s][\'class\'] is invalid.', $name));
+                throw new InvalidConfigException(sprintf('Alarm config[\'%s\'][\'class\'] is invalid.', $name));
             }
             $this->pool[$name] = $class;
         }

@@ -7,6 +7,7 @@ namespace Alarm\Handler\WeChat;
 use Alarm\Contract\FormatterInterface;
 use Alarm\Handler\WebHook\AbstractMinuteRobot;
 use Alarm\Record;
+use Exception;
 
 /**
  * Class Robot
@@ -27,14 +28,23 @@ class Robot extends AbstractMinuteRobot
 
     /**
      * @param Record $record
+     * @throws Exception
      */
     protected function transmit(Record $record)
     {
-        $this->clientFactory->create()->post($this->url, [
+        $response = $this->clientFactory->create()->post($this->url, [
             'headers' => [
                 'Content-Type' => 'application/json;charset=utf-8'
             ],
             'body' => json_encode($this->formatter->format($record), JSON_UNESCAPED_UNICODE),
         ]);
+        $contents = $response->getBody()->getContents();
+        if ($response->getStatusCode() == 200) {
+            $result = json_decode($contents, true);
+            if (is_array($result) && isset($result['errcode']) && $result['errcode'] === 0) {
+                return;
+            }
+        }
+        throw new Exception($contents);
     }
 }

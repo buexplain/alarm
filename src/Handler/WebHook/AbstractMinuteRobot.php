@@ -90,6 +90,18 @@ abstract class AbstractMinuteRobot implements HandlerInterface
         $this->chan->push($record, $this->sendTimeout);
     }
 
+    /**
+     * @param Throwable $throwable
+     */
+    protected function logThrowable(Throwable $throwable): void
+    {
+        if ($this->container->has(\Hyperf\Contract\StdoutLoggerInterface::class) && $this->container->has(\Hyperf\ExceptionHandler\Formatter\FormatterInterface::class)) {
+            $logger = $this->container->get(\Hyperf\Contract\StdoutLoggerInterface::class);
+            $formatter = $this->container->get(\Hyperf\ExceptionHandler\Formatter\FormatterInterface::class);
+            $logger->error($formatter->format($throwable));
+        }
+    }
+
     abstract protected function transmit(Record $record);
 
     /**
@@ -116,13 +128,16 @@ abstract class AbstractMinuteRobot implements HandlerInterface
                         try {
                             //发送日志
                             $this->transmit($record);
-                        } catch (ConnectException $exception) {
+                        } catch (Throwable $throwable) {
                             //发生连接异常，休眠一定时间再次尝试
-                            if ($retry < 1) {
-                                $retry++;
-                                Coroutine::sleep(1.5);
-                                goto retryLoop;
+                            if ($throwable instanceof ConnectException) {
+                                if ($retry < 1) {
+                                    $retry++;
+                                    Coroutine::sleep(1.5);
+                                    goto retryLoop;
+                                }
                             }
+                            $this->logThrowable($throwable);
                         }
                     } else {
                         //没有机会，休眠到下一分钟填充机会之后
@@ -137,6 +152,7 @@ abstract class AbstractMinuteRobot implements HandlerInterface
                     }
                     Coroutine::sleep(0.2);
                 } catch (Throwable $throwable) {
+                    $this->logThrowable($throwable);
                     Coroutine::sleep(1);
                     continue;
                 }

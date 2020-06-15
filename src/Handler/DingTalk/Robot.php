@@ -7,6 +7,7 @@ namespace Alarm\Handler\DingTalk;
 use Alarm\Contract\FormatterInterface;
 use Alarm\Handler\WebHook\AbstractIntervalRobot;
 use Alarm\Record;
+use Exception;
 
 /**
  * Class Robot
@@ -35,6 +36,7 @@ class Robot extends AbstractIntervalRobot
 
     /**
      * @param Record $record
+     * @throws Exception
      */
     protected function transmit(Record $record)
     {
@@ -48,12 +50,20 @@ class Robot extends AbstractIntervalRobot
             ]);
             $url .= "&{$query}";
         }
-        $this->clientFactory->create()->post($url, [
+        $response = $this->clientFactory->create()->post($url, [
             'headers' => [
                 'Content-Type' => 'application/json;charset=utf-8'
             ],
             'body' => json_encode($this->formatter->format($record), JSON_UNESCAPED_UNICODE),
         ]);
+        $contents = $response->getBody()->getContents();
+        if ($response->getStatusCode() == 200) {
+            $result = json_decode($contents, true);
+            if (is_array($result) && isset($result['errcode']) && $result['errcode'] === 0) {
+                return;
+            }
+        }
+        throw new Exception($contents);
     }
 
     protected function getCanonicalStringForIsv($timestamp, $suiteTicket)

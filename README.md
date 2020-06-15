@@ -47,13 +47,17 @@ return [
             [
                 'class' => \Alarm\Handler::class,
                 'constructor' => [
-                    'alarm'=>make(\Alarm\Alarm::class, [\Psr\Container\ContainerInterface::class=>\Hyperf\Utils\ApplicationContext::getContainer()]),
+                    'alarm'=>function() {
+                        return make(\Alarm\Contract\AlarmInterface::class, [
+                            \Psr\Container\ContainerInterface::class => \Hyperf\Utils\ApplicationContext::getContainer()
+                        ]);
+                    },
                     //此处的handler对应的正是config/autoload/alarm.php配置的key值
                     'handlers'=>[
-                        'dingRobot',
+                        'dingTalk',
                         'weChat',
                     ],
-                    //此处直接记录error级别以上的日志，因为接下来的逻辑有可能丢失日志
+                    //接收的日志级别
                     'level'=>\Monolog\Logger::ERROR,
                 ],
             ],
