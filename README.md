@@ -16,55 +16,7 @@
 composer require buexplain/alarm "dev-master"
 ```
 
-**新增`alarm`的配置文件** `config/autoload/alarm.php`
-
-```php
-<?php
-
-declare(strict_types=1);
-
-return [
-    //钉钉机器人配置
-   'dingTalk'=>[
-       'class' => \Alarm\Handler\DingTalk\DingTalk::class,
-       'constructor'=>[
-           'formatter' => [
-               'class' => \Alarm\Handler\DingTalk\TextFormatter::class,
-               'constructor' => [],
-           ],
-           'robots' => [
-               ['url'=>'钉钉机器人地址', 'secret'=>'钉钉机器人密钥'],
-           ]
-       ],
-   ],
-    //企业微信群机器人配置
-   'weChat'=>[
-       'class' => \Alarm\Handler\Wechat\WeChat::class,
-       'constructor'=>[
-           'formatter' => [
-               'class' => \Alarm\Handler\Wechat\TextFormatter::class,
-               'constructor' => [],
-           ],
-           'robots' => [
-               '企业微信群机器人地址'
-           ]
-       ],
-   ],
-];
-```
-
-**新增自定义进程的配置项** `config/autoload/processes.php`
-```php
-<?php
-
-declare(strict_types=1);
-
-return [
-    //告警进程
-    \Alarm\Alarm::class,
-];
-```
-> NOTE: 如果配置文件`processes.php`存在，则直接添加`\Alarm\Alarm::class`，否则请先安装自定义进程组件
+**发布告警组件的配置** `php bin/hyperf.php vendor:publish buexplain/alarm`
 
 **修改日志配置文件** `config/autoload/logger.php`
 ```php
@@ -99,7 +51,7 @@ return [
             [
                 'class' => \Alarm\Handler::class,
                 'constructor' => [
-                    'alarm'=>\Alarm\Alarm::class,
+                    'alarm'=>make(\Alarm\Alarm::class, [\Psr\Container\ContainerInterface::class=>\Hyperf\Utils\ApplicationContext::getContainer()]),
                     //此处的handler对应的正是config/autoload/alarm.php配置的key值
                     'handlers'=>[
                         'dingRobot',

@@ -112,7 +112,7 @@ abstract class AbstractIntervalRobot implements HandlerInterface
      */
     private function consume()
     {
-        $this->chan = new Channel($this->sendCondition['limit']);
+        $this->chan = new Channel($this->sendCondition['limit']*2);
         Coroutine::create(function () {
             while (true) {
                 try {

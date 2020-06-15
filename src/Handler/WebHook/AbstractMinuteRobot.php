@@ -97,7 +97,7 @@ abstract class AbstractMinuteRobot implements HandlerInterface
      */
     private function consume()
     {
-        $this->chan = new Channel($this->limit);
+        $this->chan = new Channel($this->limit*2);
         Coroutine::create(function () {
             while (true) {
                 try {

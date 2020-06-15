@@ -90,8 +90,11 @@ class Test
         ApplicationContext::setContainer($container);
         $container->shouldReceive(...['get'])->with(...[ConfigInterface::class])->andReturn(...[$config]);
         $container->shouldReceive(...['get'])->with(...[HandlerFactory::class])->andReturn(...[new HandlerFactory($config)]);
+        $container->shouldReceive(...['make'])->with(...[[ContainerInterface::class=>$container]])->andReturn(...[new Alarm($container)]);
         $container->shouldReceive(...['get'])->with(...[Alarm::class])->andReturn(...[new Alarm($container)]);
-        $container->shouldReceive(...['get'])->with(...[Handler::class])->andReturn(...[new Handler(Alarm::class, array_keys($this->config))]);
+        $container->shouldReceive(...['get'])
+            ->with(...[Handler::class])
+            ->andReturn(...[new Handler(make(Alarm::class, [ContainerInterface::class=>$container]), array_keys($this->config))]);
         $container->shouldReceive(...['has'])->with(...[StdoutLoggerInterface::class])->andReturnTrue();
         $container->shouldReceive(...['has'])->with(...[FormatterInterface::class])->andReturnTrue();
         $container->shouldReceive(...['get'])->with(...[StdoutLoggerInterface::class])->andReturn(...[new class {
@@ -104,7 +107,6 @@ class Test
         }]);
         $container->shouldReceive(...['get'])->with(...[FormatterInterface::class])->andReturn(...[new DefaultFormatter()]);
         $container->shouldReceive(...['get'])->with(...[ClientFactory::class])->andReturn(...[new ClientFactory($container)]);
-
         $atomic = new Atomic();
         $http = new Server(self::HOST, self::PORT, SWOOLE_PROCESS);
         $container->get(Alarm::class)->bind($http);

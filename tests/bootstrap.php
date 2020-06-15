@@ -15,12 +15,12 @@ require __DIR__ . '/../vendor/autoload.php';
 
 \Swoole\Runtime::enableCoroutine(true);
 
-// 测试一分钟的任意秒内启动程序，每次启动执行一定分钟数，看看是否会被限制请求
+// 测试一分钟的任意2秒内启动程序，每次启动执行一定分钟数，看看是否会被限制请求
 $step = -1;
 loop:
-$step += 1;
+$step += 2;
 $current = date('s', time());
-$s = 120 - $current + $step;
+$s = 60 - $current + $step;
 if($s > 0) {
     sleep($s);
 }
@@ -31,5 +31,8 @@ $process = new \Swoole\Process(function () {
 });
 $process->start();
 $status = \Swoole\Process::wait(true);
+if($step > 60) {
+    exit(0);
+}
 sleep(60);
 goto loop;

@@ -30,7 +30,7 @@ class Alarm implements AlarmInterface
      * 进程名称
      * @var string
      */
-    const NAME = 'hyperf-alarm-process';
+    const NAME = 'alarm-process';
 
     public $name = self::NAME;
 

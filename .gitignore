@@ -2,4 +2,4 @@
 !.gitignore
 vendor
 .php_cs.cache
-/tests export-ignore
+composer.lock

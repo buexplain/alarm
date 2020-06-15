@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Alarm;
 
+use Alarm\Contract\AlarmInterface;
 use Alarm\Exception\InvalidConfigException;
 use Monolog\Handler\AbstractHandler;
 use Monolog\Logger;
@@ -15,7 +16,7 @@ use Monolog\Logger;
 class Handler extends AbstractHandler
 {
     /**
-     * @var string
+     * @var AlarmInterface
      */
     protected $alarm;
 
@@ -26,24 +27,18 @@ class Handler extends AbstractHandler
 
     /**
      * Handler constructor.
-     * @param string $alarm
+     * @param AlarmInterface $alarm
      * @param array $handlers
      * @param int $level
      */
-    public function __construct(string $alarm, array $handlers, $level=Logger::DEBUG)
+    public function __construct(AlarmInterface $alarm, array $handlers, $level=Logger::DEBUG)
     {
         //此处强制为true，因为接下来的逻辑可能会丢失日志
         parent::__construct($level, true);
-
-        if (!class_exists($alarm) || !method_exists($alarm, 'send')) {
-            throw new InvalidConfigException(sprintf('Parameter $alarm of %s is invalid.', __CLASS__.'::'.__FUNCTION__));
-        }
-
         if (empty($handlers)) {
             throw new InvalidConfigException(sprintf('Parameter $handlers of %s is invalid.', __CLASS__.'::'.__FUNCTION__));
         }
-
-        $this->alarm = $alarm.'::send';
+        $this->alarm = $alarm;
         $this->handlers = $handlers;
     }
 
@@ -60,7 +55,7 @@ class Handler extends AbstractHandler
         $data->level = $record['level_name'];
         $data->datetime = $record['datetime'];
         $data->extra = $record['extra'];
-        call_user_func($this->alarm, $data);
+        $this->alarm::send($data);
         return $this->getBubble();
     }
 }
