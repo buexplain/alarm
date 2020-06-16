@@ -13,6 +13,7 @@
 **下载包** `composer require buexplain/alarm "dev-master"`
 
 **发布告警组件的配置** `php bin/hyperf.php vendor:publish buexplain/alarm`
+> NOTE: 告警机器人地址得自己去相关网站了解一下，然后手动修改这个配置文件。
 
 **修改日志配置文件** `config/autoload/logger.php`
 ```php
@@ -70,7 +71,10 @@ return [
 **使用**
 ```php
 $logger = \Hyperf\Utils\ApplicationContext::getContainer()->get(\Hyperf\Logger\LoggerFactory::class);
-$logger->error('Your alarm message.');
+//at群内用户需要提供手机号
+$logger->error('at一个用户', ['@'=>'135xxxxxxx1']);
+$logger->error('at两个用户', ['@'=>['135xxxxxxx1', '135xxxxxxx2']]);
+$logger->error('at所有人', ['@'=>'all']);
 ```
 
 ## License

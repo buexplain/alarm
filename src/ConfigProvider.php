@@ -4,18 +4,16 @@ declare(strict_types=1);
 
 namespace Alarm;
 
-use Alarm\Contract\AlarmInterface;
-
 class ConfigProvider
 {
     public function __invoke(): array
     {
         return [
             'dependencies' => [
-                AlarmInterface::class => Alarm::class
+                \Alarm\Contract\AlarmInterface::class => \Alarm\Alarm::class
             ],
             'processes' => [
-                \Alarm\Alarm::class,
+                \Alarm\Contract\AlarmInterface::class,
             ],
             'publish' => [
                 [

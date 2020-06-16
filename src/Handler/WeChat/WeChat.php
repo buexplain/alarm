@@ -16,12 +16,12 @@ class WeChat extends AbstractHandler
     public function __construct(array $formatter, array $robots)
     {
         if (empty($robots)) {
-            throw new InvalidConfigException(sprintf('Parameter $robots of %s is invalid.', __CLASS__.'::'.__FUNCTION__));
+            throw new InvalidConfigException('Parameter $robots is invalid.');
         }
         parent::__construct();
         foreach ($robots as $key=>$url) {
             if (empty($url)) {
-                throw new InvalidConfigException(sprintf('Parameter $robots[%d] of %s is invalid.', __CLASS__.'::'.__FUNCTION__, $key));
+                throw new InvalidConfigException(sprintf('Parameter $robots[%d] is invalid.', $key));
             }
             $parameter = [
                 'formatter'=>make($formatter['class'], $formatter['constructor']),

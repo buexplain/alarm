@@ -40,10 +40,10 @@ class Handler extends AbstractHandler
             $alarm = $alarm();
         }
         if (!($alarm instanceof AlarmInterface)) {
-            throw new InvalidConfigException(sprintf('Parameter $alarm of %s is invalid.', __CLASS__.'::'.__FUNCTION__));
+            throw new InvalidConfigException('Parameter $alarm is invalid.');
         }
         if (empty($handlers)) {
-            throw new InvalidConfigException(sprintf('Parameter $handlers of %s is invalid.', __CLASS__.'::'.__FUNCTION__));
+            throw new InvalidConfigException('Parameter $handlers is invalid.');
         }
         $this->alarm = $alarm;
         $this->handlers = $handlers;

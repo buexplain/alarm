@@ -21,7 +21,7 @@ class DingTalk extends AbstractHandler
     public function __construct(array $formatter, array $robots)
     {
         if (!isset($formatter['class'])) {
-            throw new InvalidConfigException(sprintf('Parameter $formatter[\'class\'] of %s is invalid.', __CLASS__.'::'.__FUNCTION__));
+            throw new InvalidConfigException('Parameter $formatter[\'class\'] is not defined.');
         }
         if (!isset($formatter['constructor'])) {
             $formatter['constructor'] = [];
@@ -29,10 +29,10 @@ class DingTalk extends AbstractHandler
         parent::__construct();
         foreach ($robots as $key=>$robot) {
             if (!isset($robot['url']) || empty($robot['url'])) {
-                throw new InvalidConfigException(sprintf('Parameter $robots[%d][\'url\'] of %s is invalid.', __CLASS__.'::'.__FUNCTION__, $key));
+                throw new InvalidConfigException(sprintf('Parameter $robots[%d][\'url\'] is invalid.', $key));
             }
             if (!isset($robot['secret'])) {
-                throw new InvalidConfigException(sprintf('Parameter $robots[%d][\'secret\'] of %s is invalid.', __CLASS__.'::'.__FUNCTION__, $key));
+                throw new InvalidConfigException(sprintf('Parameter $robots[%d][\'secret\'] is invalid.', $key));
             }
             $parameter = [
                 'formatter'=>make($formatter['class'], $formatter['constructor']),
