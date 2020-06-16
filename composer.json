@@ -10,16 +10,16 @@
     "dingTalk"
   ],
   "description": "这个是一个基于hyperf的告警组件",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "require": {
     "php": ">=7.2",
     "psr/log": "^1.0",
     "monolog/monolog": "^1.24",
-    "hyperf/contract": "~1.1.0",
-    "hyperf/utils": "~1.1.0",
+    "hyperf/contract": "^1.1.0",
+    "hyperf/utils": "^1.1.0",
     "hyperf/guzzle": "^1.1",
-    "hyperf/exception-handler": "~1.1.0",
-    "hyperf/process": "~1.1.0",
+    "hyperf/exception-handler": "^1.1.0",
+    "hyperf/process": "^1.1.0",
     "ext-json": "*"
   },
   "autoload": {

@@ -10,12 +10,12 @@
 
 ## 安装
 
-**下载包** `composer require buexplain/alarm "dev-master"`
+**下载包** `composer require buexplain/alarm`
 
 **发布告警组件的配置** `php bin/hyperf.php vendor:publish buexplain/alarm`
 > NOTE: 告警机器人地址的获取，请前往相关网站了解，申请成功后，手动修改这个配置文件。
 > 目前钉钉群机器人和企业微信群机器人的发送频率限制皆为每分钟20条。
-> 为避免触发对方接口的限流警告，本组件限制为单个机器人每分钟18条，可以配置多个机器人，缓解大量发送的情况。
+> 为避免触发对方接口的限流警告，本组件限制为单个机器人每分钟18条，可以配置多个机器人，缓解大量发送的需求。
 
 **修改日志配置文件** `config/autoload/logger.php`
 ```php
