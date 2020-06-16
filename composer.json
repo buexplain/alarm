@@ -1,6 +1,6 @@
 {
   "name": "buexplain/alarm",
-  "type": "project",
+  "type": "library",
   "keywords": [
     "php",
     "swoole",
@@ -13,15 +13,16 @@
   "license": "Apache-2.0",
   "require": {
     "php": ">=7.2",
-    "psr/log": "^1.0",
-    "monolog/monolog": "^1.24",
-    "hyperf/contract": "^1.1.0",
-    "hyperf/utils": "^1.1.0",
-    "hyperf/guzzle": "^1.1",
-    "hyperf/exception-handler": "^1.1.0",
-    "hyperf/process": "^1.1.0",
+    "psr/log": "*",
+    "monolog/monolog": "*",
+    "hyperf/contract": "*",
+    "hyperf/utils": "*",
+    "hyperf/guzzle": "*",
+    "hyperf/exception-handler": "*",
+    "hyperf/process": "*",
     "ext-json": "*"
   },
+  "minimum-stability": "stable",
   "autoload": {
     "psr-4": {
       "Alarm\\": "src/"
