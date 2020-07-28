@@ -9,6 +9,7 @@ use Alarm\Handler\HandlerFactory;
 use Hyperf\Process\Exception\SocketAcceptException;
 use Hyperf\Process\ProcessCollector;
 use Psr\Container\ContainerInterface;
+use Swoole\Coroutine\Server as CoServer;
 use Swoole\Process;
 use Swoole\Server;
 use Swoole\Timer;
@@ -104,17 +105,18 @@ class Alarm implements AlarmInterface
     }
 
     /**
+     * @param CoServer|Server $server
      * @return bool
      */
-    public function isEnable(): bool
+    public function isEnable($server): bool
     {
         return true;
     }
 
     /**
-     * @param Server $server
+     * @param CoServer|Server $server
      */
-    public function bind(Server $server): void
+    public function bind($server): void
     {
         $process = new Process(function (Process $process) {
             try {

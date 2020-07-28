@@ -53,7 +53,7 @@ class Handler extends AbstractHandler
      * @param array $record
      * @return bool
      */
-    public function handle(array $record)
+    public function handle(array $record): bool
     {
         $data = new Record();
         $data->handlers = $this->handlers;
