@@ -10,7 +10,6 @@ use Hyperf\Process\Exception\SocketAcceptException;
 use Hyperf\Process\ProcessCollector;
 use Psr\Container\ContainerInterface;
 use Swoole\Coroutine\Server as CoServer;
-use Swoole\Process;
 use Swoole\Server;
 use Swoole\Timer;
 use Swoole\Coroutine\Channel;
@@ -88,20 +87,7 @@ class Alarm implements AlarmInterface
          * @var $process Process
          */
         $process = $process[0];
-        try {
-            $data = serialize($record);
-            if ($data != '') {
-                $process->exportSocket()->send($data, self::$sendTimeout);
-            }
-        } catch (Throwable $throwable) {
-            $error = new Record();
-            $error->message = sprintf('%s in %s on line %d', $throwable->getMessage(), $throwable->getFile(), $throwable->getLine());
-            $error->level = $record->level;
-            $error->datetime = $record->datetime;
-            $error->handlers = $record->handlers;
-            $data = serialize($error);
-            $process->exportSocket()->send($data, self::$sendTimeout);
-        }
+        $process->pushCh($record, self::$sendTimeout);
     }
 
     /**
@@ -168,19 +154,18 @@ class Alarm implements AlarmInterface
                  */
                 $sock = $this->process->exportSocket();
                 $record = $sock->recv($this->recvLength, $this->recvTimeout);
-                if ($record === '') {
-                    throw new SocketAcceptException('Socket is closed', $sock->errCode);
-                }
                 if ($record === false && $sock->errCode !== SOCKET_ETIMEDOUT) {
+                    $sock->close();
                     throw new SocketAcceptException('Socket is closed', $sock->errCode);
                 }
                 if ($record && !$broker->isFull()) {
                     $broker->push($record, 0.01);
                 }
             } catch (Throwable $throwable) {
-                $this->logThrowable($throwable);
                 if ($throwable instanceof SocketAcceptException) {
-                    Coroutine::sleep(2);
+                    Coroutine::sleep(3);
+                } else {
+                    $this->logThrowable($throwable);
                 }
             }
         }

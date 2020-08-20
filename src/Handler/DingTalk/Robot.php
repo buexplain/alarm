@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Alarm\Handler\DingTalk;
 
 use Alarm\Contract\FormatterInterface;
+use Alarm\Exception\WaitException;
 use Alarm\Handler\WebHook\AbstractIntervalRobot;
 use Alarm\Record;
 use Exception;
@@ -59,8 +60,12 @@ class Robot extends AbstractIntervalRobot
         $contents = $response->getBody()->getContents();
         if ($response->getStatusCode() == 200) {
             $result = json_decode($contents, true);
-            if (is_array($result) && isset($result['errcode']) && $result['errcode'] === 0) {
-                return;
+            if (is_array($result)) {
+                if (isset($result['errcode']) && $result['errcode'] === 0) {
+                    return;
+                } elseif (isset($result['status']) && is_int($result['status']) && $result['status'] == 1111 && isset($result['wait']) && is_int($result['wait']) && $result['wait'] < 60) {
+                    throw new WaitException($result['wait']);
+                }
             }
         }
         throw new Exception($contents);

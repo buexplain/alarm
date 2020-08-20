@@ -15,6 +15,15 @@ require __DIR__ . '/../vendor/autoload.php';
 
 \Swoole\Runtime::enableCoroutine(true);
 
+//测试整个发送逻辑
+$process = new \Swoole\Process(function () {
+    //每轮测试4分钟
+    (new \AlarmTest\Test(1000*60*4))->run();
+});
+$process->start();
+$status = \Swoole\Process::wait(true);
+return;
+
 // 测试一分钟的任意2秒内启动程序，每次启动执行一定分钟数，看看是否会被限制请求
 $step = -1;
 loop:

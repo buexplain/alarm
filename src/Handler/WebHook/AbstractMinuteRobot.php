@@ -6,6 +6,7 @@ namespace Alarm\Handler\WebHook;
 
 use Alarm\Contract\FormatterInterface;
 use Alarm\Contract\HandlerInterface;
+use Alarm\Exception\WaitException;
 use Alarm\Record;
 use GuzzleHttp\Exception\ConnectException;
 use Hyperf\Guzzle\ClientFactory;
@@ -135,9 +136,20 @@ abstract class AbstractMinuteRobot implements HandlerInterface
                                     $retry++;
                                     Coroutine::sleep(1.5);
                                     goto retryLoop;
+                                } else {
+                                    $this->logThrowable($throwable);
                                 }
+                            } elseif ($throwable instanceof WaitException) {
+                                if ($retry < 1) {
+                                    $retry++;
+                                    Coroutine::sleep($throwable->getSecond()+1);
+                                    goto retryLoop;
+                                } else {
+                                    $this->logThrowable($throwable);
+                                }
+                            } else {
+                                $this->logThrowable($throwable);
                             }
-                            $this->logThrowable($throwable);
                         }
                     } else {
                         //没有机会，休眠到下一分钟填充机会之后

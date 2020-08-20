@@ -47,6 +47,8 @@ class Test
                 'robots' => [
                     ['url'=>'http://'.self::HOST.':'.self::PORT.'/receive?number=dingTalk-1', 'secret'=>''],
                     ['url'=>'http://'.self::HOST.':'.self::PORT.'/receive?number=dingTalk-2', 'secret'=>''],
+                    ['url'=>'https://oapi.dingtalk.com/robot/send?access_token=d606192fa6b95b3f1260594abdf0dc7ad49270803c6245c0987ca771a7dde303', 'secret'=>'SEC3b1f04dbbf93b752c55a88b824317a593f88e964295e81fb20227578b060f7f0'],
+                    ['url'=>'https://oapi.dingtalk.com/robot/send?access_token=4133140c448d5c2eb9da7248218b3e6120e0e0fa1ef76e117f00edc6d3b00d7e', 'secret'=>'SECba6382e165ac8bcac742cdbc2630684b8318a1e5ff34281bd0c6459f4b2028dd'],
                 ]
             ],
         ],
@@ -60,6 +62,8 @@ class Test
                 'robots' => [
                     'http://'.self::HOST.':'.self::PORT.'/receive?number=weChat-1',
                     'http://'.self::HOST.':'.self::PORT.'/receive?number=weChat-2',
+                    'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=ded47d9e-74ed-44a9-bbd6-b7a0b4b20171',
+                    'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=399454ef-ab74-44c7-875d-6d234ac8f149',
                 ]
             ],
         ],
@@ -109,6 +113,10 @@ class Test
         $container->shouldReceive(...['get'])->with(...[ClientFactory::class])->andReturn(...[new ClientFactory($container)]);
         $atomic = new Atomic();
         $http = new Server(self::HOST, self::PORT, SWOOLE_PROCESS);
+//        $http->set([
+//            'max_request'=>500,
+//            'worker_num'=>2,
+//        ]);
         $container->get(Alarm::class)->bind($http);
         $handler = $container->get(Handler::class);
         $http->on('request', function (\Swoole\Http\Request $request, \Swoole\Http\Response $response) use ($handler, $atomic) {
