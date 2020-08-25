@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Alarm\Handler\WebHook;
 
+use Alarm\Alarm;
 use Alarm\Contract\FormatterInterface;
 use Alarm\Contract\HandlerInterface;
 use Alarm\Exception\WaitException;
@@ -17,8 +18,7 @@ use Swoole\Coroutine\Channel;
 use Throwable;
 
 /**
- * Class AbstractIntervalRobot
- * @package Alarm\Handler\WebHook
+ * Class AbstractIntervalRobot.
  */
 abstract class AbstractIntervalRobot implements HandlerInterface
 {
@@ -44,18 +44,18 @@ abstract class AbstractIntervalRobot implements HandlerInterface
     protected $formatter;
 
     /**
-     * 发送条件
+     * 发送条件.
      * @var array
      */
     protected $sendCondition = [
         //限制周期内发送次数
-        'limit'=>18,
+        'limit' => 18,
         //当前已经发送的次数
-        'number'=>0,
+        'number' => 0,
         //发送间隔周期，单位秒
-        'interval'=>60,
+        'interval' => 60,
         //最后一次的发送的时间
-        'time'=>0,
+        'time' => 0,
     ];
 
     /**
@@ -70,7 +70,6 @@ abstract class AbstractIntervalRobot implements HandlerInterface
 
     /**
      * AbstractIntervalRobot constructor.
-     * @param FormatterInterface $formatter
      */
     public function __construct(FormatterInterface $formatter)
     {
@@ -85,8 +84,19 @@ abstract class AbstractIntervalRobot implements HandlerInterface
         $this->chan->push($record, $this->sendTimeout);
     }
 
+    protected function logThrowable(Throwable $throwable): void
+    {
+        if ($this->container->has(\Hyperf\Contract\StdoutLoggerInterface::class) && $this->container->has(\Hyperf\ExceptionHandler\Formatter\FormatterInterface::class)) {
+            $logger = $this->container->get(\Hyperf\Contract\StdoutLoggerInterface::class);
+            $formatter = $this->container->get(\Hyperf\ExceptionHandler\Formatter\FormatterInterface::class);
+            $logger->error($formatter->format($throwable));
+        }
+    }
+
+    abstract protected function transmit(Record $record);
+
     /**
-     * 检查是否满足发送条件
+     * 检查是否满足发送条件.
      * @return int|mixed
      */
     private function checkSendCondition()
@@ -104,24 +114,27 @@ abstract class AbstractIntervalRobot implements HandlerInterface
             return $diff;
         }
         $this->sendCondition['time'] = $t;
-        $this->sendCondition['number']++;
+        ++$this->sendCondition['number'];
         return 0;
     }
 
     /**
-     * 消费日志
+     * 消费日志.
      */
     private function consume()
     {
-        $this->chan = new Channel($this->sendCondition['limit']*2);
+        $this->chan = new Channel($this->sendCondition['limit'] * 2);
         Coroutine::create(function () {
-            while (true) {
+            while (Alarm::$running) {
                 try {
                     /**
-                     * 弹出一条日志
-                     * @var $record Record;
+                     * 弹出一条日志.
+                     * @var Record; $record
                      */
                     $record = $this->chan->pop();
+                    if (! $record instanceof Record) {
+                        continue;
+                    }
                     loop:
                     //检查是否满足发送条件
                     $sleep = $this->checkSendCondition();
@@ -135,27 +148,25 @@ abstract class AbstractIntervalRobot implements HandlerInterface
                             //发生连接异常，休眠一定时间再次尝试
                             if ($throwable instanceof ConnectException) {
                                 if ($retry < 1) {
-                                    $retry++;
+                                    ++$retry;
                                     Coroutine::sleep(1.5);
                                     goto retryLoop;
-                                } else {
-                                    $this->logThrowable($throwable);
                                 }
+                                $this->logThrowable($throwable);
                             } elseif ($throwable instanceof WaitException) {
                                 if ($retry < 1) {
-                                    $retry++;
-                                    Coroutine::sleep($throwable->getSecond()+1);
+                                    ++$retry;
+                                    Coroutine::sleep($throwable->getSecond() + 1);
                                     goto retryLoop;
-                                } else {
-                                    $this->logThrowable($throwable);
                                 }
+                                $this->logThrowable($throwable);
                             } else {
                                 $this->logThrowable($throwable);
                             }
                         }
                     } else {
                         //不满足发送条件，需要休眠一定的秒数，等待条件满足
-                        Coroutine::sleep($sleep+1);
+                        Coroutine::sleep($sleep + 1);
                         goto loop;
                     }
                     Coroutine::sleep(0.2);
@@ -167,18 +178,4 @@ abstract class AbstractIntervalRobot implements HandlerInterface
             }
         });
     }
-
-    /**
-     * @param Throwable $throwable
-     */
-    protected function logThrowable(Throwable $throwable): void
-    {
-        if ($this->container->has(\Hyperf\Contract\StdoutLoggerInterface::class) && $this->container->has(\Hyperf\ExceptionHandler\Formatter\FormatterInterface::class)) {
-            $logger = $this->container->get(\Hyperf\Contract\StdoutLoggerInterface::class);
-            $formatter = $this->container->get(\Hyperf\ExceptionHandler\Formatter\FormatterInterface::class);
-            $logger->error($formatter->format($throwable));
-        }
-    }
-
-    abstract protected function transmit(Record $record);
 }

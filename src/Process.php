@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Alarm;
 
 use Swoole\Coroutine;
@@ -17,11 +19,20 @@ class Process extends Base
     /**
      * @var float
      */
-    protected static $sendTimeout = 0.05;
+    protected static $sendTimeout = 0.01;
 
     public function __construct(callable $callback, bool $redirect_stdin_and_stdout = null, int $pipe_type = null, bool $enable_coroutine = null)
     {
         parent::__construct($callback, $redirect_stdin_and_stdout, $pipe_type, $enable_coroutine);
+    }
+
+    public function pushCh(Record $record, $timeout)
+    {
+        if (is_null($this->ch)) {
+            $this->ch = new Channel(100);
+            $this->popCh();
+        }
+        $this->ch->push($record, $timeout);
     }
 
     protected function popCh()
@@ -46,14 +57,5 @@ class Process extends Base
                 }
             }
         });
-    }
-
-    public function pushCh(Record $record, $timeout)
-    {
-        if (is_null($this->ch)) {
-            $this->ch = new Channel(100);
-            $this->popCh();
-        }
-        $this->ch->push($record, $timeout);
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Alarm\Handler\WebHook;
 
+use Alarm\Alarm;
 use Alarm\Contract\FormatterInterface;
 use Alarm\Contract\HandlerInterface;
 use Alarm\Exception\WaitException;
@@ -12,15 +13,14 @@ use GuzzleHttp\Exception\ConnectException;
 use Hyperf\Guzzle\ClientFactory;
 use Hyperf\Utils\ApplicationContext;
 use Psr\Container\ContainerInterface;
+use SplDoublyLinkedList;
 use Swoole\Coroutine;
 use Swoole\Coroutine\Channel;
 use Swoole\Timer;
 use Throwable;
-use SplDoublyLinkedList;
 
 /**
- * Class AbstractMinuteRobot
- * @package Alarm\Handler\WebHook
+ * Class AbstractMinuteRobot.
  */
 abstract class AbstractMinuteRobot implements HandlerInterface
 {
@@ -46,6 +46,12 @@ abstract class AbstractMinuteRobot implements HandlerInterface
     protected $formatter;
 
     /**
+     * 一分钟内的机会次数.
+     * @var int
+     */
+    protected $limit = 18;
+
+    /**
      * @var SplDoublyLinkedList
      */
     private $chance;
@@ -56,25 +62,18 @@ abstract class AbstractMinuteRobot implements HandlerInterface
     private $chan;
 
     /**
-     * 一分钟内的机会次数
-     * @var int
-     */
-    protected $limit = 18;
-
-    /**
      * @var float
      */
     private $sendTimeout = 0.01;
 
     /**
-     * 空档秒数
+     * 空档秒数.
      * @var int
      */
     private $neutral = 5;
 
     /**
      * AbstractMinuteRobot constructor.
-     * @param FormatterInterface $formatter
      */
     public function __construct(FormatterInterface $formatter)
     {
@@ -91,9 +90,6 @@ abstract class AbstractMinuteRobot implements HandlerInterface
         $this->chan->push($record, $this->sendTimeout);
     }
 
-    /**
-     * @param Throwable $throwable
-     */
     protected function logThrowable(Throwable $throwable): void
     {
         if ($this->container->has(\Hyperf\Contract\StdoutLoggerInterface::class) && $this->container->has(\Hyperf\ExceptionHandler\Formatter\FormatterInterface::class)) {
@@ -106,19 +102,22 @@ abstract class AbstractMinuteRobot implements HandlerInterface
     abstract protected function transmit(Record $record);
 
     /**
-     * 消费日志
+     * 消费日志.
      */
     private function consume()
     {
-        $this->chan = new Channel($this->limit*2);
+        $this->chan = new Channel($this->limit * 2);
         Coroutine::create(function () {
-            while (true) {
+            while (Alarm::$running) {
                 try {
                     /**
-                     * 弹出一条日志
-                     * @var $record Record;
+                     * 弹出一条日志.
+                     * @var Record; $record
                      */
                     $record = $this->chan->pop();
+                    if (! $record instanceof Record) {
+                        continue;
+                    }
                     loop:
                     //检查是否有机会
                     if ($this->chance->count()) {
@@ -133,20 +132,18 @@ abstract class AbstractMinuteRobot implements HandlerInterface
                             //发生连接异常，休眠一定时间再次尝试
                             if ($throwable instanceof ConnectException) {
                                 if ($retry < 1) {
-                                    $retry++;
+                                    ++$retry;
                                     Coroutine::sleep(1.5);
                                     goto retryLoop;
-                                } else {
-                                    $this->logThrowable($throwable);
                                 }
+                                $this->logThrowable($throwable);
                             } elseif ($throwable instanceof WaitException) {
                                 if ($retry < 1) {
-                                    $retry++;
-                                    Coroutine::sleep($throwable->getSecond()+1);
+                                    ++$retry;
+                                    Coroutine::sleep($throwable->getSecond() + 1);
                                     goto retryLoop;
-                                } else {
-                                    $this->logThrowable($throwable);
                                 }
+                                $this->logThrowable($throwable);
                             } else {
                                 $this->logThrowable($throwable);
                             }
@@ -173,28 +170,28 @@ abstract class AbstractMinuteRobot implements HandlerInterface
     }
 
     /**
-     * 填充机会
+     * 填充机会.
      */
     private function fillChance()
     {
-        for ($i=0;$i<$this->limit;$i++) {
+        for ($i = 0; $i < $this->limit; ++$i) {
             $this->chance->push($i);
         }
     }
 
     /**
-     * 清空机会
+     * 清空机会.
      */
     private function clearChance()
     {
         $c = $this->chance->count();
-        for ($i=0;$i<$c;$i++) {
+        for ($i = 0; $i < $c; ++$i) {
             $this->chance->pop();
         }
     }
 
     /**
-     * 投递机会
+     * 投递机会.
      */
     private function tickChance()
     {
@@ -205,19 +202,19 @@ abstract class AbstractMinuteRobot implements HandlerInterface
             //距离下一分钟需要休眠，填充机会
             $this->fillChance();
             //设置休眠时间
-            Timer::after($sleep*1000, function () use ($sleep) {
+            Timer::after($sleep * 1000, function () use ($sleep) {
                 //当前时间为一分钟的开始时间，清空机会
                 $this->clearChance();
                 //设置每一分钟的开始时间都清空机会的定时任务
-                Timer::tick(1000*60, function () {
+                Timer::tick(1000 * 60, function () {
                     $this->clearChance();
                 });
                 //休眠一定秒数，再设置一波填充机会的定时任务
-                Timer::after($this->neutral*1000, function () {
+                Timer::after($this->neutral * 1000, function () {
                     //填充机会
                     $this->fillChance();
                     //设置填充机会的定时任务
-                    Timer::tick(1000*60, function () {
+                    Timer::tick(1000 * 60, function () {
                         $this->fillChance();
                     });
                 });
@@ -226,15 +223,15 @@ abstract class AbstractMinuteRobot implements HandlerInterface
             //当前为一分钟的开始时间，清空机会
             $this->clearChance();
             //设置每一分钟的开始时间就清空机会的定时任务
-            Timer::tick(1000*60, function () {
+            Timer::tick(1000 * 60, function () {
                 $this->clearChance();
             });
             //休眠一定秒数，再设置一波填充机会的定时任务
-            Timer::after($this->neutral*1000, function () {
+            Timer::after($this->neutral * 1000, function () {
                 //填充机会
                 $this->fillChance();
                 //设置填充机会的定时任务
-                Timer::tick(1000*60, function () {
+                Timer::tick(1000 * 60, function () {
                     $this->fillChance();
                 });
             });

@@ -8,21 +8,19 @@ use Alarm\Handler\WebHook\AbstractTextFormatter;
 use Alarm\Record;
 
 /**
- * Class TextFormatter
- * @package Alarm\Handler\WeChat
+ * Class TextFormatter.
  */
 class TextFormatter extends AbstractTextFormatter
 {
     public function format(Record $record)
     {
         $data = parent::format($record);
-        $result = [
-            'msgtype'=>'text',
-            'text'=>[
-                'content'=>$data['content'],
-                'mentioned_mobile_list'=>$data['isAtAll'] ? ['@all'] : $data['atMobiles'],
+        return [
+            'msgtype' => 'text',
+            'text' => [
+                'content' => $data['content'],
+                'mentioned_mobile_list' => $data['isAtAll'] ? ['@all'] : $data['atMobiles'],
             ],
         ];
-        return $result;
     }
 }

@@ -7,8 +7,7 @@ namespace Alarm\Contract;
 use Alarm\Record;
 
 /**
- * Interface HandlerInterface
- * @package Alarm\Contract
+ * Interface HandlerInterface.
  */
 interface HandlerInterface
 {

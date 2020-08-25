@@ -8,21 +8,19 @@ use Alarm\Contract\FormatterInterface;
 use Alarm\Record;
 
 /**
- * Class AbstractTextFormatter
- * @package Alarm\Handler\WebHook
+ * Class AbstractTextFormatter.
  */
 abstract class AbstractTextFormatter implements FormatterInterface
 {
     /**
-     * @param Record $record
      * @return array
      */
     public function format(Record $record)
     {
         $result = [
-            'atMobiles'=>[],
-            'isAtAll'=>false,
-            'content'=>'',
+            'atMobiles' => [],
+            'isAtAll' => false,
+            'content' => '',
         ];
 
         $context = $record->context;
@@ -45,14 +43,14 @@ abstract class AbstractTextFormatter implements FormatterInterface
         }
 
         //格式化内容成文本
-        $content = sprintf("[%s] %s: %s", $record->datetime->format('Y-m-d H:i:s'), $record->level, $record->message);
+        $content = sprintf('[%s] %s: %s', $record->datetime->format('Y-m-d H:i:s'), $record->level, $record->message);
         if (count($context)) {
-            foreach ($context as $key=>$value) {
+            foreach ($context as $key => $value) {
                 $content .= sprintf("\n%s: %s", $key, self::toString($value));
             }
         }
         if (count($record->extra)) {
-            foreach ($record->extra as $key=>$value) {
+            foreach ($record->extra as $key => $value) {
                 $content .= sprintf("\n%s: %s", $key, self::toString($value));
             }
         }

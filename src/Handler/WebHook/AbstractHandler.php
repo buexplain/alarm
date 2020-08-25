@@ -9,8 +9,7 @@ use Alarm\Record;
 use SplQueue;
 
 /**
- * Class AbstractHandler
- * @package Alarm\Handler\WebHook
+ * Class AbstractHandler.
  */
 abstract class AbstractHandler implements HandlerInterface
 {
@@ -24,21 +23,18 @@ abstract class AbstractHandler implements HandlerInterface
         $this->queue = new SplQueue();
     }
 
-    /**
-     * @param HandlerInterface $handler
-     */
-    final protected function enqueue(HandlerInterface $handler)
-    {
-        $this->queue->push($handler);
-    }
-
     public function send(Record $record)
     {
         /**
-         * @var $robot HandlerInterface
+         * @var HandlerInterface $robot
          */
         $robot = $this->queue->shift();
-        $this->queue->push($robot);
         $robot->send($record);
+        $this->queue->push($robot);
+    }
+
+    final protected function enqueue(HandlerInterface $handler)
+    {
+        $this->queue->push($handler);
     }
 }

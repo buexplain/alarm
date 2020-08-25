@@ -11,8 +11,7 @@ use Alarm\Record;
 use Exception;
 
 /**
- * Class Robot
- * @package Alarm\Handler\DingTalk
+ * Class Robot.
  */
 class Robot extends AbstractIntervalRobot
 {
@@ -24,11 +23,9 @@ class Robot extends AbstractIntervalRobot
 
     /**
      * Robot constructor.
-     * @param FormatterInterface $formatter
-     * @param string $url
      * @param string $secret
      */
-    public function __construct(FormatterInterface $formatter, string $url, $secret='')
+    public function __construct(FormatterInterface $formatter, string $url, $secret = '')
     {
         $this->url = $url;
         $this->secret = $secret;
@@ -36,24 +33,23 @@ class Robot extends AbstractIntervalRobot
     }
 
     /**
-     * @param Record $record
      * @throws Exception
      */
     protected function transmit(Record $record)
     {
         $url = $this->url;
-        if (!empty($this->secret)) {
+        if (! empty($this->secret)) {
             $timestamp = $this->getMillisecond();
             $signature = $this->computeSignature($this->secret, $this->getCanonicalStringForIsv($timestamp, $this->secret));
             $query = http_build_query([
-                'timestamp'=>$timestamp,
-                'sign'=>$signature,
+                'timestamp' => $timestamp,
+                'sign' => $signature,
             ]);
             $url .= "&{$query}";
         }
         $response = $this->clientFactory->create()->post($url, [
             'headers' => [
-                'Content-Type' => 'application/json;charset=utf-8'
+                'Content-Type' => 'application/json;charset=utf-8',
             ],
             'body' => json_encode($this->formatter->format($record), JSON_UNESCAPED_UNICODE),
         ]);
@@ -63,7 +59,8 @@ class Robot extends AbstractIntervalRobot
             if (is_array($result)) {
                 if (isset($result['errcode']) && $result['errcode'] === 0) {
                     return;
-                } elseif (isset($result['status']) && is_int($result['status']) && $result['status'] == 1111 && isset($result['wait']) && is_int($result['wait']) && $result['wait'] < 60) {
+                }
+                if (isset($result['status']) && is_int($result['status']) && $result['status'] == 1111 && isset($result['wait']) && is_int($result['wait']) && $result['wait'] < 60) {
                     throw new WaitException($result['wait']);
                 }
             }
@@ -75,7 +72,7 @@ class Robot extends AbstractIntervalRobot
     {
         $result = $timestamp;
         if ($suiteTicket != null) {
-            $result .= "\n".$suiteTicket;
+            $result .= "\n" . $suiteTicket;
         }
         return $result;
     }
@@ -88,7 +85,7 @@ class Robot extends AbstractIntervalRobot
 
     protected function getMillisecond()
     {
-        list($s1, $s2) = explode(' ', microtime());
-        return (float)sprintf('%.0f', (floatval($s1) + floatval($s2)) * 1000);
+        [$s1, $s2] = explode(' ', microtime());
+        return (float) sprintf('%.0f', (floatval($s1) + floatval($s2)) * 1000);
     }
 }

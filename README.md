@@ -50,11 +50,6 @@ return [
             [
                 'class' => \Alarm\Handler::class,
                 'constructor' => [
-                    'alarm'=>function() {
-                        return make(\Alarm\Contract\AlarmInterface::class, [
-                            \Psr\Container\ContainerInterface::class => \Hyperf\Utils\ApplicationContext::getContainer()
-                        ]);
-                    },
                     //此处的handler对应的正是config/autoload/alarm.php配置的key值
                     'handlers'=>[
                         'dingTalk',
@@ -68,11 +63,14 @@ return [
     ],
 ];
 ```
-> NOTE: 如果配置文件`logger.php`存在，则直接在需要告警的日志渠道上添加`告警日志处理器`，否则请先安装日志组件 
+> NOTE:
+>  1. 如果配置文件`logger.php`存在，则直接在需要告警的日志渠道上添加`告警日志处理器`，否则请先安装日志组件
+>  2. 如果配置文件`signal.php`存在，则需要配置`\Alarm\Signal\AlarmStopHandler::class` 
+> 
 
 **使用**
 ```php
-$logger = \Hyperf\Utils\ApplicationContext::getContainer()->get(\Hyperf\Logger\LoggerFactory::class);
+$logger = \Hyperf\Utils\ApplicationContext::getContainer()->get(\Hyperf\Logger\LoggerFactory::class)->get();
 //at群内用户需要提供手机号
 $logger->error('at一个用户', ['@'=>'135xxxxxxx1']);
 $logger->error('at两个用户', ['@'=>['135xxxxxxx1', '135xxxxxxx2']]);

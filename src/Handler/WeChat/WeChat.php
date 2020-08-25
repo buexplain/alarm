@@ -8,8 +8,7 @@ use Alarm\Exception\InvalidConfigException;
 use Alarm\Handler\WebHook\AbstractHandler;
 
 /**
- * Class WeChat
- * @package Alarm\Handler\WeChat
+ * Class WeChat.
  */
 class WeChat extends AbstractHandler
 {
@@ -19,13 +18,13 @@ class WeChat extends AbstractHandler
             throw new InvalidConfigException('Parameter $robots is invalid.');
         }
         parent::__construct();
-        foreach ($robots as $key=>$url) {
+        foreach ($robots as $key => $url) {
             if (empty($url)) {
                 throw new InvalidConfigException(sprintf('Parameter $robots[%d] is invalid.', $key));
             }
             $parameter = [
-                'formatter'=>make($formatter['class'], $formatter['constructor']),
-                'url'=>$url,
+                'formatter' => make($formatter['class'], $formatter['constructor']),
+                'url' => $url,
             ];
             $this->enqueue(make(Robot::class, $parameter));
         }

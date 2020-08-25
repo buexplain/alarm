@@ -7,8 +7,7 @@ namespace Alarm\Exception;
 use RuntimeException;
 
 /**
- * Class InvalidConfigException
- * @package Alarm\Exception
+ * Class InvalidConfigException.
  */
 class InvalidConfigException extends RuntimeException
 {

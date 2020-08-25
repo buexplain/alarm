@@ -7,8 +7,7 @@ namespace Alarm\Contract;
 use Alarm\Record;
 
 /**
- * Interface FormatterInterface
- * @package Alarm\Contract
+ * Interface FormatterInterface.
  */
 interface FormatterInterface
 {

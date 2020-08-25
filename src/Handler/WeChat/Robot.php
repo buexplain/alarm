@@ -10,15 +10,12 @@ use Alarm\Record;
 use Exception;
 
 /**
- * Class Robot
- * @package Alarm\Handler\WeChat
+ * Class Robot.
  */
 class Robot extends AbstractMinuteRobot
 {
     /**
      * Robot constructor.
-     * @param FormatterInterface $formatter
-     * @param string $url
      */
     public function __construct(FormatterInterface $formatter, string $url)
     {
@@ -27,14 +24,13 @@ class Robot extends AbstractMinuteRobot
     }
 
     /**
-     * @param Record $record
      * @throws Exception
      */
     protected function transmit(Record $record)
     {
         $response = $this->clientFactory->create()->post($this->url, [
             'headers' => [
-                'Content-Type' => 'application/json;charset=utf-8'
+                'Content-Type' => 'application/json;charset=utf-8',
             ],
             'body' => json_encode($this->formatter->format($record), JSON_UNESCAPED_UNICODE),
         ]);

@@ -4,64 +4,58 @@ declare(strict_types=1);
 
 namespace Alarm;
 
-use Alarm\Contract\AlarmInterface;
 use Alarm\Handler\HandlerFactory;
+use Hyperf\Process\AbstractProcess as Base;
+use Hyperf\Process\Event\AfterProcessHandle;
+use Hyperf\Process\Event\BeforeProcessHandle;
 use Hyperf\Process\Exception\SocketAcceptException;
 use Hyperf\Process\ProcessCollector;
 use Psr\Container\ContainerInterface;
-use Swoole\Coroutine\Server as CoServer;
+use Swoole\Coroutine;
+use Swoole\Coroutine\Socket;
 use Swoole\Server;
 use Swoole\Timer;
-use Swoole\Coroutine\Channel;
-use Swoole\Coroutine;
-use Swoole\Coroutine\System;
-use Swoole\Coroutine\Socket;
 use Throwable;
 
-/**
- * Class Alarm
- * @package Alarm
- */
-class Alarm implements AlarmInterface
+class Alarm extends Base
 {
     /**
-     * 进程名称
+     * 进程名称.
      * @var string
      */
-    const NAME = 'alarm-process';
+    const NAME = 'alarm';
+
+    /**
+     * @var bool
+     */
+    public static $running = true;
 
     public $name = self::NAME;
 
     /**
      * @var int
      */
-    protected $recvLength = 65535;
+    public $nums = 1;
 
     /**
-     * @var float
+     * @var bool
      */
-    protected $recvTimeout = -1;
-
-    /**
-     * @var float
-     */
-    protected static $sendTimeout = 0.05;
+    public $redirectStdinStdout = false;
 
     /**
      * @var int
      */
-    protected $restartInterval = 5;
+    public $pipeType = SOCK_DGRAM;
 
     /**
-     * @var Process
+     * @var bool
      */
-    protected $process;
-
+    public $enableCoroutine = true;
 
     /**
-     * @var ContainerInterface
+     * @var float
      */
-    protected $container;
+    protected static $sendTimeout = 0.01;
 
     /**
      * @var HandlerFactory
@@ -70,13 +64,10 @@ class Alarm implements AlarmInterface
 
     public function __construct(ContainerInterface $container)
     {
-        $this->container = $container;
+        parent::__construct($container);
         $this->handlerFactory = $this->container->get(HandlerFactory::class);
     }
 
-    /**
-     * @param Record $record
-     */
     public static function send(Record $record)
     {
         $process = ProcessCollector::get(self::NAME);
@@ -84,82 +75,40 @@ class Alarm implements AlarmInterface
             return;
         }
         /**
-         * @var $process Process
+         * @var Process $process
          */
         $process = $process[0];
         $process->pushCh($record, self::$sendTimeout);
     }
 
-    /**
-     * @param CoServer|Server $server
-     * @return bool
-     */
-    public function isEnable($server): bool
-    {
-        return true;
-    }
-
-    /**
-     * @param CoServer|Server $server
-     */
-    public function bind($server): void
-    {
-        $process = new Process(function (Process $process) {
-            try {
-                $this->process = $process;
-                $this->handle();
-            } catch (Throwable $throwable) {
-                $this->logThrowable($throwable);
-            } finally {
-                Timer::clearAll();
-                System::sleep($this->restartInterval);
-            }
-        }, false, 2, true);
-        $server->addProcess($process);
-        ProcessCollector::add($this->name, $process);
-    }
-
     public function handle(): void
     {
-        $broker = new Channel(20);
-
-        Coroutine::create(function () use ($broker) {
-            while (true) {
-                try {
-                    $record = $broker->pop();
-                    /**
-                     * @var $record Record
-                     */
-                    $record = unserialize((string)$record);
-                    if ($record !== false && ($record instanceof Record)) {
-                        foreach ($record->handlers as $name) {
-                            try {
-                                $handler = $this->handlerFactory->get($name);
-                                $handler->send($record);
-                            } catch (Throwable $throwable) {
-                                $this->logThrowable($throwable);
-                            }
-                        }
-                    }
-                } catch (Throwable $throwable) {
-                    $this->logThrowable($throwable);
-                }
-            }
-        });
-
-        while (true) {
+        while (self::$running) {
             try {
                 /**
                  * @var Socket $sock
                  */
                 $sock = $this->process->exportSocket();
+
                 $record = $sock->recv($this->recvLength, $this->recvTimeout);
                 if ($record === false && $sock->errCode !== SOCKET_ETIMEDOUT) {
                     $sock->close();
                     throw new SocketAcceptException('Socket is closed', $sock->errCode);
                 }
-                if ($record && !$broker->isFull()) {
-                    $broker->push($record, 0.01);
+
+                /**
+                 * @var Record $record
+                 */
+                $record = unserialize((string) $record);
+                if ($record !== false && ($record instanceof Record)) {
+                    foreach ($record->handlers as $name) {
+                        try {
+                            $handler = $this->handlerFactory->get($name);
+                            $handler->send($record);
+                        } catch (Throwable $throwable) {
+                            $this->logThrowable($throwable);
+                        }
+                    }
                 }
             } catch (Throwable $throwable) {
                 if ($throwable instanceof SocketAcceptException) {
@@ -171,17 +120,30 @@ class Alarm implements AlarmInterface
         }
     }
 
-    /**
-     * @param Throwable $throwable
-     */
-    protected function logThrowable(Throwable $throwable): void
+    protected function bindServer(Server $server): void
     {
-        if ($this->container->has(\Hyperf\Contract\StdoutLoggerInterface::class) && $this->container->has(\Hyperf\ExceptionHandler\Formatter\FormatterInterface::class)) {
-            $logger = $this->container->get(\Hyperf\Contract\StdoutLoggerInterface::class);
-            $formatter = $this->container->get(\Hyperf\ExceptionHandler\Formatter\FormatterInterface::class);
-            $logger->error($formatter->format($throwable));
-            if ($throwable instanceof SocketAcceptException) {
-                $logger->critical('Socket of process is unavailable, please restart the server');
+        $num = $this->nums;
+        for ($i = 0; $i < $num; ++$i) {
+            $process = new Process(function (Process $process) use ($i) {
+                try {
+                    $this->event && $this->event->dispatch(new BeforeProcessHandle($this, $i));
+
+                    $this->process = $process;
+
+                    $this->handle();
+
+                    $this->event && $this->event->dispatch(new AfterProcessHandle($this, $i));
+                } catch (\Throwable $throwable) {
+                    $this->logThrowable($throwable);
+                } finally {
+                    Timer::clearAll();
+                    sleep($this->restartInterval);
+                }
+            }, $this->redirectStdinStdout, $this->pipeType, $this->enableCoroutine);
+            $server->addProcess($process);
+
+            if ($this->enableCoroutine) {
+                ProcessCollector::add($this->name, $process);
             }
         }
     }

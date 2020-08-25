@@ -9,11 +9,8 @@ class ConfigProvider
     public function __invoke(): array
     {
         return [
-            'dependencies' => [
-                \Alarm\Contract\AlarmInterface::class => \Alarm\Alarm::class
-            ],
             'processes' => [
-                \Alarm\Contract\AlarmInterface::class,
+                \Alarm\Alarm::class,
             ],
             'publish' => [
                 [
