@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace Alarm\Handler\WebHook;
 
-use Alarm\Alarm;
 use Alarm\Contract\FormatterInterface;
 use Alarm\Contract\HandlerInterface;
+use Alarm\Contract\Manager;
+use Alarm\Contract\Record;
 use Alarm\Exception\WaitException;
-use Alarm\Record;
 use GuzzleHttp\Exception\ConnectException;
+use Hyperf\Contract\StdoutLoggerInterface;
 use Hyperf\Guzzle\ClientFactory;
 use Hyperf\Utils\ApplicationContext;
 use Psr\Container\ContainerInterface;
@@ -86,8 +87,8 @@ abstract class AbstractIntervalRobot implements HandlerInterface
 
     protected function logThrowable(Throwable $throwable): void
     {
-        if ($this->container->has(\Hyperf\Contract\StdoutLoggerInterface::class) && $this->container->has(\Hyperf\ExceptionHandler\Formatter\FormatterInterface::class)) {
-            $logger = $this->container->get(\Hyperf\Contract\StdoutLoggerInterface::class);
+        if ($this->container->has(StdoutLoggerInterface::class) && $this->container->has(\Hyperf\ExceptionHandler\Formatter\FormatterInterface::class)) {
+            $logger = $this->container->get(StdoutLoggerInterface::class);
             $formatter = $this->container->get(\Hyperf\ExceptionHandler\Formatter\FormatterInterface::class);
             $logger->error($formatter->format($throwable));
         }
@@ -125,7 +126,7 @@ abstract class AbstractIntervalRobot implements HandlerInterface
     {
         $this->chan = new Channel($this->sendCondition['limit'] * 2);
         Coroutine::create(function () {
-            while (Alarm::$running) {
+            while (Manager::isRunning()) {
                 try {
                     /**
                      * 弹出一条日志.

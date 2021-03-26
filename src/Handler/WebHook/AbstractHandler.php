@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Alarm\Handler\WebHook;
 
 use Alarm\Contract\HandlerInterface;
-use Alarm\Record;
+use Alarm\Contract\Record;
 use SplQueue;
 
 /**

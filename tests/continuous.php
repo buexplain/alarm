@@ -15,18 +15,18 @@ date_default_timezone_set('Asia/Shanghai');
 
 //测试整个发送逻辑，每秒发送20个，持续五分钟
 $process = new \Swoole\Process(function () {
-    for($i=0; $i<20; $i++) {
+    for ($i = 0; $i < 20; ++$i) {
         Swoole\Timer::tick(1000, function () {
             (new \Swoole\Coroutine\Http\Client('127.0.0.1', 9501))->get('/alarm');
         });
     }
     $wg = new \Swoole\Coroutine\WaitGroup();
     $wg->add();
-    \Swoole\Coroutine::create(function ()  use($wg) {
+    \Swoole\Coroutine::create(function () use ($wg) {
         \Swoole\Coroutine::defer(function () use ($wg) {
             $wg->done();
         });
-        \Swoole\Timer::after(1000*60*5, function() {
+        \Swoole\Timer::after(1000 * 60 * 5, function () {
             Swoole\Timer::clearAll();
         });
     });

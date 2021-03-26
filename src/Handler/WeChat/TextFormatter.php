@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Alarm\Handler\WeChat;
 
+use Alarm\Contract\Record;
 use Alarm\Handler\WebHook\AbstractTextFormatter;
-use Alarm\Record;
 
 /**
  * Class TextFormatter.

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Alarm;
+namespace Alarm\Contract;
 
 use DateTime;
 use Psr\Log\LogLevel;

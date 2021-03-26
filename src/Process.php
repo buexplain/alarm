@@ -4,17 +4,21 @@ declare(strict_types=1);
 
 namespace Alarm;
 
+use Alarm\Contract\InterfaceProcess;
+use Alarm\Contract\Manager;
+use Alarm\Contract\Record;
 use Swoole\Coroutine;
 use Swoole\Coroutine\Channel;
 use Swoole\Coroutine\Socket;
 use Swoole\Process as Base;
+use Throwable;
 
-class Process extends Base
+class Process extends Base implements InterfaceProcess
 {
     /**
      * @var Channel socket保护，避免多协成同时写
      */
-    protected $ch;
+    protected $protectorCh;
 
     /**
      * @var float
@@ -26,20 +30,20 @@ class Process extends Base
         parent::__construct($callback, $redirect_stdin_and_stdout, $pipe_type, $enable_coroutine);
     }
 
-    public function pushCh(Record $record, $timeout)
+    public function send(Record $record, float $timeout = 0.01)
     {
-        if (is_null($this->ch)) {
-            $this->ch = new Channel(100);
-            $this->popCh();
+        if (is_null($this->protectorCh)) {
+            $this->init();
         }
-        $this->ch->push($record, $timeout);
+        $this->protectorCh->push($record, $timeout);
     }
 
-    protected function popCh()
+    protected function init()
     {
-        \Swoole\Coroutine::create(function () {
-            while (true) {
-                $record = $this->ch->pop();
+        $this->protectorCh = new Channel(10);
+        Coroutine::create(function () {
+            while (Manager::isRunning()) {
+                $record = $this->protectorCh->pop();
                 try {
                     $data = serialize($record);
                     if ($data != '') {
@@ -53,7 +57,7 @@ class Process extends Base
                             Coroutine::sleep(3);
                         }
                     }
-                } catch (\Throwable $throwable) {
+                } catch (Throwable $throwable) {
                 }
             }
         });

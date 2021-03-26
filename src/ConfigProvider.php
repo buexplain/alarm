@@ -10,7 +10,7 @@ class ConfigProvider
     {
         return [
             'processes' => [
-                \Alarm\Alarm::class,
+                Alarm::class,
             ],
             'publish' => [
                 [

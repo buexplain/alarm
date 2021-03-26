@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Alarm\Handler\DingTalk;
 
 use Alarm\Contract\FormatterInterface;
+use Alarm\Contract\Record;
 use Alarm\Exception\WaitException;
 use Alarm\Handler\WebHook\AbstractIntervalRobot;
-use Alarm\Record;
 use Exception;
 
 /**

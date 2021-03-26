@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Alarm;
 
+use Alarm\Contract\Manager;
+use Alarm\Contract\Record;
 use Alarm\Exception\InvalidConfigException;
 use Monolog\Handler\AbstractHandler;
 use Monolog\Logger;
@@ -37,7 +39,7 @@ class Handler extends AbstractHandler
         $data->level = $record['level_name'];
         $data->datetime = $record['datetime'];
         $data->extra = $record['extra'];
-        \Hyperf\Utils\ApplicationContext::getContainer()->get(Alarm::class)::send($data);
+        Manager::send($data);
         return $this->getBubble();
     }
 }

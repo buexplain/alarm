@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Alarm\Handler\WebHook;
 
 use Alarm\Contract\FormatterInterface;
-use Alarm\Record;
+use Alarm\Contract\Record;
 
 /**
  * Class AbstractTextFormatter.

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Alarm\Signal;
 
-use Alarm\Alarm;
+use Alarm\Contract\Manager;
 use Hyperf\Signal\SignalHandlerInterface;
 
 class AlarmStopHandler implements SignalHandlerInterface
@@ -18,6 +18,6 @@ class AlarmStopHandler implements SignalHandlerInterface
 
     public function handle(int $signal): void
     {
-        Alarm::$running = false;
+        Manager::setRunning(false);
     }
 }

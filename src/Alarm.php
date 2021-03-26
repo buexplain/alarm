@@ -4,63 +4,59 @@ declare(strict_types=1);
 
 namespace Alarm;
 
+use Alarm\Contract\Manager;
+use Alarm\Contract\Record;
 use Alarm\Handler\HandlerFactory;
-use Hyperf\Process\AbstractProcess as Base;
+use Hyperf\Process\AbstractProcess;
 use Hyperf\Process\Event\AfterProcessHandle;
 use Hyperf\Process\Event\BeforeProcessHandle;
+use Hyperf\Process\Exception\ServerInvalidException;
 use Hyperf\Process\Exception\SocketAcceptException;
-use Hyperf\Process\ProcessCollector;
 use Psr\Container\ContainerInterface;
 use Swoole\Coroutine;
 use Swoole\Coroutine\Socket;
+use Swoole\Process as SwooleProcess;
 use Swoole\Server;
 use Swoole\Timer;
 use Throwable;
 
-class Alarm extends Base
+/**
+ * 自定义日志上报进程
+ * 必须在协程环境下使用
+ * 不支持协程风格的服务器
+ */
+class Alarm extends AbstractProcess
 {
     /**
-     * 进程名称.
+     * 进程名称
      * @var string
      */
-    const NAME = 'alarm';
-
-    /**
-     * @var bool
-     */
-    public static $running = true;
-
-    public $name = self::NAME;
+    public $name = 'alarm';
 
     /**
      * @var int
      */
-    public $nums = 1;
-
-    /**
-     * @var bool
-     */
-    public $redirectStdinStdout = false;
+    protected $restartInterval = 5;
 
     /**
      * @var int
      */
-    public $pipeType = SOCK_DGRAM;
-
-    /**
-     * @var bool
-     */
-    public $enableCoroutine = true;
+    protected $recvLength = 65535;
 
     /**
      * @var float
      */
-    protected static $sendTimeout = 0.01;
+    protected $recvTimeout = 5.0;
 
     /**
      * @var HandlerFactory
      */
     protected $handlerFactory;
+
+    /**
+     * @var null|Process
+     */
+    protected $process;
 
     public function __construct(ContainerInterface $container)
     {
@@ -68,22 +64,14 @@ class Alarm extends Base
         $this->handlerFactory = $this->container->get(HandlerFactory::class);
     }
 
-    public static function send(Record $record)
+    public function isEnable($server): bool
     {
-        $process = ProcessCollector::get(self::NAME);
-        if (empty($process) || empty($record->handlers)) {
-            return;
-        }
-        /**
-         * @var Process $process
-         */
-        $process = $process[0];
-        $process->pushCh($record, self::$sendTimeout);
+        return true;
     }
 
     public function handle(): void
     {
-        while (self::$running) {
+        while (Manager::isRunning()) {
             try {
                 /**
                  * @var Socket $sock
@@ -111,7 +99,7 @@ class Alarm extends Base
                     }
                 }
             } catch (Throwable $throwable) {
-                if ($throwable instanceof SocketAcceptException) {
+                if ($throwable instanceof SocketAcceptException && $throwable->isTimeout()) {
                     Coroutine::sleep(3);
                 } else {
                     $this->logThrowable($throwable);
@@ -120,31 +108,39 @@ class Alarm extends Base
         }
     }
 
+    /**
+     * 重写父类方法
+     * 1、不支持协程风格服务
+     * @param Coroutine\Http\Server|Coroutine\Server|Server $server
+     */
+    public function bind($server): void
+    {
+        if (!$server instanceof Server) {
+            throw new ServerInvalidException(sprintf('Server %s not supported.', get_class($server)));
+        }
+        $this->bindServer($server);
+    }
+
+    /**
+     * 重写父类方法
+     * 1、不支持接收worker/task的数据事件
+     * 2、强制开启协程
+     */
     protected function bindServer(Server $server): void
     {
-        $num = $this->nums;
-        for ($i = 0; $i < $num; ++$i) {
-            $process = new Process(function (Process $process) use ($i) {
-                try {
-                    $this->event && $this->event->dispatch(new BeforeProcessHandle($this, $i));
-
-                    $this->process = $process;
-
-                    $this->handle();
-
-                    $this->event && $this->event->dispatch(new AfterProcessHandle($this, $i));
-                } catch (\Throwable $throwable) {
-                    $this->logThrowable($throwable);
-                } finally {
-                    Timer::clearAll();
-                    sleep($this->restartInterval);
-                }
-            }, $this->redirectStdinStdout, $this->pipeType, $this->enableCoroutine);
-            $server->addProcess($process);
-
-            if ($this->enableCoroutine) {
-                ProcessCollector::add($this->name, $process);
+        $process = new Process(function (SwooleProcess $process) {
+            try {
+                $this->event && $this->event->dispatch(new BeforeProcessHandle($this, 0));
+                $this->process = $process;
+                $this->handle();
+            } catch (Throwable $throwable) {
+                $this->logThrowable($throwable);
+            } finally {
+                $this->event && $this->event->dispatch(new AfterProcessHandle($this, 0));
+                Timer::clearAll();
             }
-        }
+        }, false, SOCK_DGRAM, true);
+        $server->addProcess($process);
+        Manager::setProcess($process);
     }
 }

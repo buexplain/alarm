@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Alarm\Handler\WeChat;
 
 use Alarm\Contract\FormatterInterface;
+use Alarm\Contract\Record;
 use Alarm\Exception\WaitException;
 use Alarm\Handler\WebHook\AbstractMinuteRobot;
-use Alarm\Record;
 use Exception;
 
 /**
@@ -43,7 +43,7 @@ class Robot extends AbstractMinuteRobot
                     return;
                 }
                 if (isset($result['errcode']) && is_int($result['errcode']) && ($result['errcode'] == 45009 || $result['errcode'] == -1)) {
-                    /**
+                    /*
                      * @link https://open.work.weixin.qq.com/api/doc/90000/90139/90313#%E9%94%99%E8%AF%AF%E7%A0%81%EF%BC%9A45009
                      */
                     throw new WaitException(60);

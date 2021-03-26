@@ -65,7 +65,9 @@ return [
 ```
 > NOTE:
 >  1. 如果配置文件`logger.php`存在，则直接在需要告警的日志渠道上添加`告警日志处理器`，否则请先安装日志组件
->  2. 如果配置文件`signal.php`存在，则需要配置`\Alarm\Signal\AlarmStopHandler::class` 
+>  2. 如果配置文件`signal.php`存在，则需要配置`\Alarm\Signal\AlarmStopHandler::class => PHP_INT_MAX`
+>  3. 必须在协程环境下使用
+>  4. 不支持协程风格的服务器
 > 
 
 **使用**

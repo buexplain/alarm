@@ -17,10 +17,9 @@
     "monolog/monolog": "*",
     "hyperf/contract": "*",
     "hyperf/utils": "*",
-    "hyperf/guzzle": "~2.0.0",
+    "hyperf/guzzle": "2.1.*",
     "hyperf/exception-handler": "*",
-    "hyperf/process": "~2.0.0",
-    "ext-json": "*"
+    "hyperf/process": "2.1.*"
   },
   "minimum-stability": "stable",
   "autoload": {
