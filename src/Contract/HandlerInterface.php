@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace Alarm\Contract;
 
 /**
- * Interface HandlerInterface.
+ * Interface HandlerInterface
+ * @package Alarm\Contract
  */
 interface HandlerInterface
 {

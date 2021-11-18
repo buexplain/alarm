@@ -8,7 +8,8 @@ use DateTime;
 use Psr\Log\LogLevel;
 
 /**
- * Class Record.
+ * Class Record
+ * @package Alarm\Contract
  */
 class Record
 {

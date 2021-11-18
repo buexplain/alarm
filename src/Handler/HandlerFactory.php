@@ -9,7 +9,8 @@ use Alarm\Exception\InvalidConfigException;
 use Hyperf\Contract\ConfigInterface;
 
 /**
- * Class HandlerFactory.
+ * Class HandlerFactory
+ * @package Alarm\Handler
  */
 class HandlerFactory
 {
@@ -30,10 +31,11 @@ class HandlerFactory
 
     /**
      * @param $name
+     * @return HandlerInterface
      */
     public function get($name): HandlerInterface
     {
-        $class = isset($this->pool[$name]) ? $this->pool[$name] : null;
+        $class = $this->pool[$name] ?? null;
         if (! $class) {
             $config = (array) $this->config->get('alarm', []);
             if (! isset($config[$name])) {
@@ -42,7 +44,7 @@ class HandlerFactory
             if (! isset($config[$name]['class'])) {
                 throw new InvalidConfigException(sprintf('Alarm config[\'%s\'][\'class\'] is not defined.', $name));
             }
-            $class = make($config[$name]['class'], isset($config[$name]['constructor']) ? $config[$name]['constructor'] : []);
+            $class = make($config[$name]['class'], $config[$name]['constructor'] ?? []);
             if (! ($class instanceof HandlerInterface)) {
                 throw new InvalidConfigException(sprintf('Alarm config[\'%s\'][\'class\'] is invalid.', $name));
             }

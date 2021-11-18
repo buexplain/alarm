@@ -7,14 +7,24 @@ namespace Alarm\Handler\DingTalk;
 use Alarm\Contract\FormatterInterface;
 use Alarm\Contract\Record;
 use Alarm\Exception\WaitException;
-use Alarm\Handler\WebHook\AbstractIntervalRobot;
+use Alarm\Handler\AbstractRobot;
 use Exception;
+use GuzzleHttp\Exception\GuzzleException;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 /**
- * Class Robot.
+ * Class Robot
+ * @package Alarm\Handler\DingTalk
  */
-class Robot extends AbstractIntervalRobot
+class Robot extends AbstractRobot
 {
+    /**
+     * 机器人地址
+     * @var string
+     */
+    protected $url = '';
+
     /**
      * 机器人安全码
      * @var string
@@ -23,9 +33,13 @@ class Robot extends AbstractIntervalRobot
 
     /**
      * Robot constructor.
+     * @param FormatterInterface $formatter
+     * @param string $url
      * @param string $secret
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
-    public function __construct(FormatterInterface $formatter, string $url, $secret = '')
+    public function __construct(FormatterInterface $formatter, string $url, string $secret = '')
     {
         $this->url = $url;
         $this->secret = $secret;
@@ -33,19 +47,19 @@ class Robot extends AbstractIntervalRobot
     }
 
     /**
-     * @throws Exception
+     * @throws Exception|GuzzleException
      */
-    protected function transmit(Record $record)
+    protected function send(Record $record)
     {
         $url = $this->url;
-        if (! empty($this->secret)) {
+        if (!empty($this->secret)) {
             $timestamp = $this->getMillisecond();
             $signature = $this->computeSignature($this->secret, $this->getCanonicalStringForIsv($timestamp, $this->secret));
             $query = http_build_query([
                 'timestamp' => $timestamp,
                 'sign' => $signature,
             ]);
-            $url .= "&{$query}";
+            $url .= "&$query";
         }
         $response = $this->clientFactory->create()->post($url, [
             'headers' => [
@@ -60,15 +74,19 @@ class Robot extends AbstractIntervalRobot
                 if (isset($result['errcode']) && $result['errcode'] === 0) {
                     return;
                 }
-                if (isset($result['status']) && is_int($result['status']) && $result['status'] == 1111 && isset($result['wait']) && is_int($result['wait']) && $result['wait'] < 60) {
-                    throw new WaitException($result['wait']);
+                //客户端发送太快
+                if (isset($result['errcode']) && $result['errcode'] == 130101) {
+                    throw new WaitException(60);
+                }
+                //钉钉要求客户端等待指定秒数发送
+                if (isset($result['status']) && is_int($result['status']) && $result['status'] == 1111 && isset($result['wait']) && is_int($result['wait']) && $result['wait'] > 0) {
+                    throw new WaitException($result['wait'] <= 60 ? $result['wait'] : 60);
                 }
             }
         }
-        throw new Exception($contents);
     }
 
-    protected function getCanonicalStringForIsv($timestamp, $suiteTicket)
+    protected function getCanonicalStringForIsv($timestamp, $suiteTicket): string
     {
         $result = $timestamp;
         if ($suiteTicket != null) {
@@ -77,15 +95,14 @@ class Robot extends AbstractIntervalRobot
         return $result;
     }
 
-    protected function computeSignature($accessSecret, $canonicalString)
+    protected function computeSignature($accessSecret, $canonicalString): string
     {
         $s = hash_hmac('sha256', $canonicalString, $accessSecret, true);
         return base64_encode($s);
     }
 
-    protected function getMillisecond()
+    protected function getMillisecond(): int
     {
-        [$s1, $s2] = explode(' ', microtime());
-        return (float) sprintf('%.0f', (floatval($s1) + floatval($s2)) * 1000);
+        return (int)(microtime(true) * 1000);
     }
 }

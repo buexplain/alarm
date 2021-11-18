@@ -12,14 +12,14 @@
   "description": "这个是一个基于hyperf的告警组件",
   "license": "Apache-2.0",
   "require": {
-    "php": ">=7.2",
+    "php": ">=7.4",
     "psr/log": "*",
     "monolog/monolog": "*",
-    "hyperf/contract": "*",
-    "hyperf/utils": "*",
-    "hyperf/guzzle": "2.1.*",
-    "hyperf/exception-handler": "*",
-    "hyperf/process": "2.1.*"
+    "hyperf/contract": "~2.2",
+    "hyperf/utils": "~2.2",
+    "hyperf/guzzle": "~2.2",
+    "hyperf/exception-handler": "~2.2",
+    "hyperf/process": "~2.2"
   },
   "minimum-stability": "stable",
   "autoload": {
@@ -28,8 +28,8 @@
     }
   },
   "require-dev": {
-    "swoft/swoole-ide-helper": "^4.5",
-    "friendsofphp/php-cs-fixer": "^2.14"
+    "swoole/ide-helper": "@dev",
+    "friendsofphp/php-cs-fixer": "^3.0"
   },
   "extra": {
     "hyperf": {

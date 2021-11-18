@@ -6,6 +6,10 @@ namespace Alarm\Exception;
 
 use RuntimeException;
 
+/**
+ * Class WaitException
+ * @package Alarm\Exception
+ */
 class WaitException extends RuntimeException
 {
     protected $second = 0;

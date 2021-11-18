@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace Alarm\Handler\WeChat;
 
 use Alarm\Contract\Record;
-use Alarm\Handler\WebHook\AbstractTextFormatter;
+use Alarm\Handler\AbstractTextFormatter;
 
 /**
- * Class TextFormatter.
+ * Class TextFormatter
+ * @package Alarm\Handler\WeChat
  */
 class TextFormatter extends AbstractTextFormatter
 {
-    public function format(Record $record)
+    public function format(Record $record): array
     {
         $data = parent::format($record);
         return [

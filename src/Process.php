@@ -40,7 +40,7 @@ class Process extends Base implements InterfaceProcess
 
     protected function init()
     {
-        $this->protectorCh = new Channel(10);
+        $this->protectorCh = new Channel(20);
         Coroutine::create(function () {
             while (Manager::isRunning()) {
                 $record = $this->protectorCh->pop();

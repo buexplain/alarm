@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace Alarm\Handler\WeChat;
 
 use Alarm\Exception\InvalidConfigException;
-use Alarm\Handler\WebHook\AbstractHandler;
+use Alarm\Handler\AbstractHandler;
 
 /**
- * Class WeChat.
+ * Class WeChat
+ * @package Alarm\Handler\WeChat
  */
 class WeChat extends AbstractHandler
 {

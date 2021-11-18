@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Alarm\Contract;
 
+/**
+ * Class Manager
+ * @package Alarm\Contract
+ */
 class Manager
 {
     /**

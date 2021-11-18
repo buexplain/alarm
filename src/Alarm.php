@@ -12,12 +12,17 @@ use Hyperf\Process\Event\AfterProcessHandle;
 use Hyperf\Process\Event\BeforeProcessHandle;
 use Hyperf\Process\Exception\ServerInvalidException;
 use Hyperf\Process\Exception\SocketAcceptException;
+use Hyperf\Utils\Coordinator\Constants;
+use Hyperf\Utils\Coordinator\CoordinatorManager;
+use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Swoole\Coroutine;
 use Swoole\Coroutine\Socket;
 use Swoole\Process as SwooleProcess;
 use Swoole\Server;
 use Swoole\Timer;
+use swoole_process;
 use Throwable;
 
 /**
@@ -32,11 +37,6 @@ class Alarm extends AbstractProcess
      * @var string
      */
     public $name = 'alarm';
-
-    /**
-     * @var int
-     */
-    protected $restartInterval = 5;
 
     /**
      * @var int
@@ -58,6 +58,10 @@ class Alarm extends AbstractProcess
      */
     protected $process;
 
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
     public function __construct(ContainerInterface $container)
     {
         parent::__construct($container);
@@ -78,8 +82,8 @@ class Alarm extends AbstractProcess
                  */
                 $sock = $this->process->exportSocket();
 
-                $record = $sock->recv($this->recvLength, $this->recvTimeout);
-                if ($record === false && $sock->errCode !== SOCKET_ETIMEDOUT) {
+                $data = $sock->recv($this->recvLength, $this->recvTimeout);
+                if ($data === false && $sock->errCode !== SOCKET_ETIMEDOUT) {
                     $sock->close();
                     throw new SocketAcceptException('Socket is closed', $sock->errCode);
                 }
@@ -87,8 +91,8 @@ class Alarm extends AbstractProcess
                 /**
                  * @var Record $record
                  */
-                $record = unserialize((string) $record);
-                if ($record !== false && ($record instanceof Record)) {
+                $record = unserialize((string) $data);
+                if ($record instanceof Record) {
                     foreach ($record->handlers as $name) {
                         try {
                             $handler = $this->handlerFactory->get($name);
@@ -128,6 +132,9 @@ class Alarm extends AbstractProcess
      */
     protected function bindServer(Server $server): void
     {
+        /**
+         * @var $process SwooleProcess|swoole_process
+         */
         $process = new Process(function (SwooleProcess $process) {
             try {
                 $this->event && $this->event->dispatch(new BeforeProcessHandle($this, 0));
@@ -138,6 +145,8 @@ class Alarm extends AbstractProcess
             } finally {
                 $this->event && $this->event->dispatch(new AfterProcessHandle($this, 0));
                 Timer::clearAll();
+                CoordinatorManager::until(Constants::WORKER_EXIT)->resume();
+                sleep($this->restartInterval);
             }
         }, false, SOCK_DGRAM, true);
         $server->addProcess($process);

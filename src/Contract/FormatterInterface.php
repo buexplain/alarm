@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace Alarm\Contract;
 
 /**
- * Interface FormatterInterface.
+ * Interface FormatterInterface
+ * @package Alarm\Contract
  */
 interface FormatterInterface
 {

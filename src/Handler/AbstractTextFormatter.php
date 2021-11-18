@@ -2,20 +2,22 @@
 
 declare(strict_types=1);
 
-namespace Alarm\Handler\WebHook;
+namespace Alarm\Handler;
 
 use Alarm\Contract\FormatterInterface;
 use Alarm\Contract\Record;
 
 /**
- * Class AbstractTextFormatter.
+ * Class AbstractTextFormatter
+ * @package Alarm\Handler
  */
 abstract class AbstractTextFormatter implements FormatterInterface
 {
     /**
+     * @param Record $record
      * @return array
      */
-    public function format(Record $record)
+    public function format(Record $record): array
     {
         $result = [
             'atMobiles' => [],
@@ -59,7 +61,7 @@ abstract class AbstractTextFormatter implements FormatterInterface
         return $result;
     }
 
-    private static function toString($value)
+    protected static function toString($value): string
     {
         if (is_bool($value)) {
             return $value ? 'true' : 'false';
@@ -67,6 +69,6 @@ abstract class AbstractTextFormatter implements FormatterInterface
         if (is_scalar($value)) {
             return sprintf('%s', $value);
         }
-        return var_export($value, true);
+        return (string) var_export($value, true);
     }
 }

@@ -7,16 +7,30 @@ namespace Alarm\Handler\WeChat;
 use Alarm\Contract\FormatterInterface;
 use Alarm\Contract\Record;
 use Alarm\Exception\WaitException;
-use Alarm\Handler\WebHook\AbstractMinuteRobot;
+use Alarm\Handler\AbstractRobot;
 use Exception;
+use GuzzleHttp\Exception\GuzzleException;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 /**
- * Class Robot.
+ * Class Robot
+ * @package Alarm\Handler\WeChat
  */
-class Robot extends AbstractMinuteRobot
+class Robot extends AbstractRobot
 {
     /**
+     * 机器人地址
+     * @var string
+     */
+    protected $url = '';
+
+    /**
      * Robot constructor.
+     * @param FormatterInterface $formatter
+     * @param string $url
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function __construct(FormatterInterface $formatter, string $url)
     {
@@ -25,9 +39,9 @@ class Robot extends AbstractMinuteRobot
     }
 
     /**
-     * @throws Exception
+     * @throws Exception|GuzzleException
      */
-    protected function transmit(Record $record)
+    protected function send(Record $record)
     {
         $response = $this->clientFactory->create()->post($this->url, [
             'headers' => [
@@ -50,6 +64,5 @@ class Robot extends AbstractMinuteRobot
                 }
             }
         }
-        throw new Exception($contents);
     }
 }
