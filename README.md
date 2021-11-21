@@ -54,10 +54,35 @@ return [
                     'handlers'=>[
                         'dingTalk',
                         'weChat',
+                        'feiShu',
                     ],
                     //接收的日志级别
                     'level'=>\Monolog\Logger::ERROR,
                 ],
+            ],
+        ],
+    ],
+    'alarm' => [  // 这是另外一种使用方式 \Hyperf\Utils\ApplicationContext::getContainer()->get(\Hyperf\Logger\LoggerFactory::class)->get('xxxxx' , 'alarm')->error('tips');
+        'handlers' => [
+            //告警日志处理器
+            [
+                'class' => \Alarm\Handler::class,
+                'constructor' => [
+                    //此处的handler对应的正是config/autoload/alarm.php配置的key值
+                    'handlers'=>[
+                        'feiShu',
+                    ],
+                    //接收的日志级别
+                    'level'=>\Monolog\Logger::ERROR,
+                ],
+            ],
+        ],
+        'formatter' => [
+            'class'       => Monolog\Formatter\LineFormatter::class,
+            'constructor' => [
+                'format'                => null,
+                'dateFormat'            => 'Y-m-d H:i:s.u',
+                'allowInlineLineBreaks' => true,
             ],
         ],
     ],
