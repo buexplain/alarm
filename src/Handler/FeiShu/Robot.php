@@ -31,6 +31,15 @@ class Robot extends AbstractRobot
      */
     protected $secret = '';
 
+    protected $limit_error_code = [
+        5000 => '内部错误，减少调用频率，稍后再试',
+        55001 => '服务内部错误，减少调用频率，稍后再试',
+        90217 => '请求太频繁，请降低请求调用频率',
+        190005 => '应用被限流，稍后再试，适当减小请求频率',
+        1000004 => '接口请求过快，超出频率限制，降低请求频率',
+        1000005 => '应用被限流，降低请求频率',
+    ];
+
     /**
      * Robot constructor.
      * @param FormatterInterface $formatter
@@ -75,7 +84,7 @@ class Robot extends AbstractRobot
                     return;
                 }
                 //客户端发送太快
-                if (isset($result['errcode']) && in_array($result['errcode'] , [190005, 90217,1000004,1000005,5000,55001])) {
+                if (isset($result['errcode']) && isset($this->limit_error_code[$result['errcode']])) {
                     throw new WaitException(30);
                 }
             }
