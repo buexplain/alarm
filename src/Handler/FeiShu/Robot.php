@@ -75,7 +75,7 @@ class Robot extends AbstractRobot
                     return;
                 }
                 //客户端发送太快
-                if (isset($result['errcode']) && in_array($result['errcode'] , [190005.90217,1000004,1000005,5000,55001])) {
+                if (isset($result['errcode']) && in_array($result['errcode'] , [190005, 90217,1000004,1000005,5000,55001])) {
                     throw new WaitException(30);
                 }
             }
