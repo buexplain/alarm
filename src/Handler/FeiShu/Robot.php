@@ -62,13 +62,13 @@ class Robot extends AbstractRobot
     {
         $url = $this->url;
         if (!empty($this->secret)) {
-            $timestamp = $this->getMillisecond();
+            $timestamp = $this->getTimestamp();
             $signature = $this->computeSignature($this->secret, $this->getCanonicalStringForIsv($timestamp, $this->secret));
             $query = http_build_query([
                 'timestamp' => $timestamp,
                 'sign' => $signature,
             ]);
-            $url .= "&$query";
+            $url .= (strpos($url, '?') === false ? "?" : "&").$query;
         }
         $response = $this->clientFactory->create()->post($url, [
             'headers' => [
@@ -80,11 +80,11 @@ class Robot extends AbstractRobot
         if ($response->getStatusCode() == 200) {
             $result = json_decode($contents, true);
             if (is_array($result)) {
-                if (isset($result['errcode']) && $result['errcode'] === 0) {
+                if (isset($result['code']) && $result['code'] === 0) {
                     return;
                 }
                 //客户端发送太快
-                if (isset($result['errcode']) && isset($this->limit_error_code[$result['errcode']])) {
+                if (isset($result['code']) && isset($this->limit_error_code[$result['code']])) {
                     throw new WaitException(30);
                 }
             }
@@ -102,12 +102,12 @@ class Robot extends AbstractRobot
 
     protected function computeSignature($accessSecret, $canonicalString): string
     {
-        $s = hash_hmac('sha256', $canonicalString, $accessSecret, true);
+        $s = hash_hmac('sha256', '' , $canonicalString, true);
         return base64_encode($s);
     }
 
-    protected function getMillisecond(): int
+    protected function getTimestamp(): int
     {
-        return (int)(microtime(true) * 1000);
+        return time();
     }
 }
