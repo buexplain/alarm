@@ -79,12 +79,9 @@ class Robot extends AbstractRobot
         $contents = $response->getBody()->getContents();
         if ($response->getStatusCode() == 200) {
             $result = json_decode($contents, true);
-            if (is_array($result)) {
-                if (isset($result['code']) && $result['code'] === 0) {
-                    return;
-                }
+            if (isset($result['code'])) {
                 //客户端发送太快
-                if (isset($result['code']) && isset($this->limit_error_code[$result['code']])) {
+                if (isset($this->limit_error_code[$result['code']])) {
                     throw new WaitException(30);
                 }
             }
