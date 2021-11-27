@@ -63,7 +63,7 @@ class Robot extends AbstractRobot
         $url = $this->url;
         if (!empty($this->secret)) {
             $timestamp = $this->getTimestamp();
-            $signature = $this->computeSignature($this->secret, $this->getCanonicalStringForIsv($timestamp, $this->secret));
+            $signature = $this->computeSignature($this->getCanonicalStringForIsv($timestamp, $this->secret));
             $query = http_build_query([
                 'timestamp' => $timestamp,
                 'sign' => $signature,
@@ -100,7 +100,7 @@ class Robot extends AbstractRobot
         return $result;
     }
 
-    protected function computeSignature($accessSecret, $canonicalString): string
+    protected function computeSignature($canonicalString): string
     {
         $s = hash_hmac('sha256', '' , $canonicalString, true);
         return base64_encode($s);
