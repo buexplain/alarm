@@ -24,8 +24,6 @@ class PostFormatter extends AbstractTextFormatter
             'msg_type' => 'post',
             'content'  => [],
         ];
-        $content = sprintf('[%s] %s: %s', $record->datetime->format('Y-m-d H:i:s'), $record->level, $record->message);
-
         $message_arr = $record->message ? json_decode($record->message, true) : [];
         $is_return = false;
         if (isset($message_arr['zh_cn']['title']) && ($message_arr['zh_cn']['content'] ?? [])) {

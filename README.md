@@ -98,10 +98,10 @@ return [
 **使用**
 ```php
 $logger = \Hyperf\Utils\ApplicationContext::getContainer()->get(\Hyperf\Logger\LoggerFactory::class)->get();
-//at群内用户需要提供手机号
-$logger->error('at一个用户', ['@'=>'135xxxxxxx1']);
-$logger->error('at两个用户', ['@'=>['135xxxxxxx1', '135xxxxxxx2']]);
-$logger->error('at所有人', ['@'=>'all']);
+//at群内用户需要提供手机号(飞书不支持)
+$logger->error('at一个用户', ['@'=>'135xxxxxxx1']); // 注意: 目前飞书不支持 @指定用户提醒 , 只能群呼
+$logger->error('at两个用户', ['@'=>['135xxxxxxx1', '135xxxxxxx2']]); // 注意: 目前飞书不支持 @指定用户提醒 , 只能群呼
+$logger->error('at所有人', ['@'=>'all']); // 注意: 目前飞书不支持 @指定用户提醒 , 只能群呼
 ```
 
 ## License
