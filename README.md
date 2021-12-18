@@ -104,5 +104,7 @@ $logger->error('at两个用户', ['@'=>['135xxxxxxx1', '135xxxxxxx2']]);
 $logger->error('at所有人', ['@'=>'all']); 
 ```
 
+[README.feishu.md , 飞书的使用例子](README.feishu.md)
+
 ## License
 [Apache-2.0](http://www.apache.org/licenses/LICENSE-2.0.html)
