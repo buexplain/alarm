@@ -106,5 +106,5 @@ $content['zh_cn']['content'][] = [
     ['tag' => 'a', 'text' => '第一个链接', 'href' => 'https://open.feishu.cn/'], // 第二个内容 , 这是一个链接
 ];
 
-$logger->get($name = '管理后台测试1', $group = 'alarm_post')->error($content); // 富文本告警 (建议只用标题 + 内容 + 链接的方式) , 图片类需要先接入飞书的上传接口上传完图片后才能发图片类的日志 , 不适合告警业务.
+$logger->get($name = '管理后台测试1', $group = 'alarm_post')->error(json_encode($content)); // 富文本告警 (建议只用标题 + 内容 + 链接的方式) , 图片类需要先接入飞书的上传接口上传完图片后才能发图片类的日志 , 不适合告警业务.
 ```
