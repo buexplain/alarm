@@ -99,6 +99,8 @@ $logger = ApplicationContext::getContainer()->get(\Hyperf\Logger\LoggerFactory::
 $logger->get($name = '管理后台测试', $group = 'alarm')->error('22333');  // 普通文本告警
 
 // 看飞书文档  https://open.feishu.cn/document/uAjLw4CM/ukTMukTMukTM/im-v1/message/create_json?lang=zh-CN#45e0953e , 格式根据文档对应一下即可
+$title = '标题';
+$text = '内容';
 $content = [];
 $content['zh_cn']['title'] = $title; // 标题
 $content['zh_cn']['content'][] = [
