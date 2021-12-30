@@ -68,13 +68,17 @@ class Robot extends AbstractRobot
                 'timestamp' => $timestamp,
                 'sign' => $signature,
             ]);
-            $url .= (strpos($url, '?') === false ? "?" : "&").$query;
+            $url .= (strpos($url, '?') === false ? "?" : "&") . $query;
+        }
+        $body = $this->formatter->format($record);
+        if (empty($body)) {
+            return;
         }
         $response = $this->clientFactory->create()->post($url, [
             'headers' => [
                 'Content-Type' => 'application/json;charset=utf-8',
             ],
-            'body' => json_encode($this->formatter->format($record), JSON_UNESCAPED_UNICODE),
+            'body' => json_encode($body, JSON_UNESCAPED_UNICODE),
         ]);
         $contents = $response->getBody()->getContents();
         if ($response->getStatusCode() == 200) {
@@ -99,7 +103,7 @@ class Robot extends AbstractRobot
 
     protected function computeSignature($canonicalString): string
     {
-        $s = hash_hmac('sha256', '' , $canonicalString, true);
+        $s = hash_hmac('sha256', '', $canonicalString, true);
         return base64_encode($s);
     }
 
