@@ -54,10 +54,35 @@ return [
                     'handlers'=>[
                         'dingTalk',
                         'weChat',
+                        'feiShu',
                     ],
                     //接收的日志级别
                     'level'=>\Monolog\Logger::ERROR,
                 ],
+            ],
+        ],
+    ],
+    'alarm' => [  // 这是另外一种使用方式 \Hyperf\Utils\ApplicationContext::getContainer()->get(\Hyperf\Logger\LoggerFactory::class)->get('xxxxx' , 'alarm')->error('tips');
+        'handlers' => [
+            //告警日志处理器
+            [
+                'class' => \Alarm\Handler::class,
+                'constructor' => [
+                    //此处的handler对应的正是config/autoload/alarm.php配置的key值
+                    'handlers'=>[
+                        'feiShu',
+                    ],
+                    //接收的日志级别
+                    'level'=>\Monolog\Logger::ERROR,
+                ],
+            ],
+        ],
+        'formatter' => [
+            'class'       => Monolog\Formatter\LineFormatter::class,
+            'constructor' => [
+                'format'                => null,
+                'dateFormat'            => 'Y-m-d H:i:s.u',
+                'allowInlineLineBreaks' => true,
             ],
         ],
     ],
@@ -73,11 +98,13 @@ return [
 **使用**
 ```php
 $logger = \Hyperf\Utils\ApplicationContext::getContainer()->get(\Hyperf\Logger\LoggerFactory::class)->get();
-//at群内用户需要提供手机号
-$logger->error('at一个用户', ['@'=>'135xxxxxxx1']);
-$logger->error('at两个用户', ['@'=>['135xxxxxxx1', '135xxxxxxx2']]);
-$logger->error('at所有人', ['@'=>'all']);
+//at群内用户需要提供手机号(飞书不支持)
+$logger->error('at一个用户', ['@'=>'135xxxxxxx1']); // 注意: 目前飞书不支持 @指定用户提醒 , 只能群呼
+$logger->error('at两个用户', ['@'=>['135xxxxxxx1', '135xxxxxxx2']]); 
+$logger->error('at所有人', ['@'=>'all']); 
 ```
+
+[README.feishu.md , 飞书的使用例子](README.feishu.md)
 
 ## License
 [Apache-2.0](http://www.apache.org/licenses/LICENSE-2.0.html)

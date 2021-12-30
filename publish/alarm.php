@@ -29,4 +29,17 @@ return [
             ],
         ],
     ],
+    //飞书群机器人配置
+    'feiShu' => [
+        'class' => \Alarm\Handler\FeiShu\FeiShu::class,
+        'constructor' => [
+            'formatter' => [
+                'class' => \Alarm\Handler\FeiShu\TextFormatter::class,
+                'constructor' => [],
+            ],
+            'robots' => [
+//                ['url' => '', 'secret' => ''],
+            ],
+        ],
+    ],
 ];
