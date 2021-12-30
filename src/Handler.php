@@ -20,10 +20,9 @@ class Handler extends AbstractHandler
      */
     protected $handlers = [];
 
-    public function __construct(array $handlers, $level = Logger::DEBUG)
+    public function __construct(array $handlers, $level = Logger::DEBUG, bool $bubble = true)
     {
-        //此处强制为true，因为接下来的逻辑可能会丢失日志
-        parent::__construct($level, true);
+        parent::__construct($level, $bubble);
         if (empty($handlers)) {
             throw new InvalidConfigException('Parameter $handlers is invalid.');
         }
