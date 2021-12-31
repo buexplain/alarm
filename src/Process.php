@@ -16,7 +16,7 @@ use Throwable;
 class Process extends Base implements InterfaceProcess
 {
     /**
-     * @var Channel socket保护，避免多协成同时写
+     * @var Channel socket保护，避免多协程同时写，导致崩溃
      */
     protected $protectorCh;
 
@@ -42,6 +42,10 @@ class Process extends Base implements InterfaceProcess
     {
         $this->protectorCh = new Channel(20);
         Coroutine::create(function () {
+            defer(function () {
+                $this->protectorCh->close();
+                $this->protectorCh = null;
+            });
             while (Manager::isRunning()) {
                 $record = $this->protectorCh->pop();
                 try {
