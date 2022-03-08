@@ -31,14 +31,16 @@ class Handler extends AbstractHandler
 
     public function handle(array $record): bool
     {
-        $data = new Record();
-        $data->handlers = $this->handlers;
-        $data->message = $record['message'];
-        $data->context = $record['context'];
-        $data->level = $record['level_name'];
-        $data->datetime = $record['datetime'];
-        $data->extra = $record['extra'];
-        Manager::send($data);
-        return $this->getBubble();
+        if($this->isHandling($record)) {
+            $data = new Record();
+            $data->handlers = $this->handlers;
+            $data->message = $record['message'];
+            $data->context = $record['context'];
+            $data->level = $record['level_name'];
+            $data->datetime = $record['datetime'];
+            $data->extra = $record['extra'];
+            Manager::send($data);
+        }
+        return false === $this->bubble;
     }
 }
