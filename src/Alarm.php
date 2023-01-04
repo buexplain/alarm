@@ -36,17 +36,17 @@ class Alarm extends AbstractProcess
      * 进程名称
      * @var string
      */
-    public $name = 'alarm';
+    public string $name = 'alarm';
 
     /**
      * @var int
      */
-    protected $recvLength = 65535;
+    protected int $recvLength = 65535;
 
     /**
      * @var float
      */
-    protected $recvTimeout = 5.0;
+    protected float $recvTimeout = 5.0;
 
     /**
      * @var HandlerFactory
@@ -56,7 +56,7 @@ class Alarm extends AbstractProcess
     /**
      * @var null|Process
      */
-    protected $process;
+    protected ?SwooleProcess $process;
 
     /**
      * @throws ContainerExceptionInterface
