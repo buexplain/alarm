@@ -95,7 +95,7 @@ return [
 ### 调用例子
 
 ```php
-$logger = ApplicationContext::getContainer()->get(\Hyperf\Logger\LoggerFactory::class);
+$logger = \Hyperf\Utils\ApplicationContext::getContainer()->get(\Hyperf\Logger\LoggerFactory::class);
 $logger->get($name = '管理后台测试', $group = 'alarm')->error('22333');  // 普通文本告警
 
 // 看飞书文档  https://open.feishu.cn/document/uAjLw4CM/ukTMukTMukTM/im-v1/message/create_json?lang=zh-CN#45e0953e , 格式根据文档对应一下即可

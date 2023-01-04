@@ -26,6 +26,5 @@ class TextFormatter extends AbstractTextFormatter
                 'text' => $data['content'],
             ],
         ];
-        // {"msg_type":"text","content":{"text":"request example"}}
     }
 }

@@ -20,10 +20,9 @@ class Handler extends AbstractHandler
      */
     protected $handlers = [];
 
-    public function __construct(array $handlers, $level = Logger::DEBUG)
+    public function __construct(array $handlers, $level = Logger::DEBUG, bool $bubble = true)
     {
-        //此处强制为true，因为接下来的逻辑可能会丢失日志
-        parent::__construct($level, true);
+        parent::__construct($level, $bubble);
         if (empty($handlers)) {
             throw new InvalidConfigException('Parameter $handlers is invalid.');
         }
@@ -32,14 +31,16 @@ class Handler extends AbstractHandler
 
     public function handle(array $record): bool
     {
-        $data = new Record();
-        $data->handlers = $this->handlers;
-        $data->message = $record['message'];
-        $data->context = $record['context'];
-        $data->level = $record['level_name'];
-        $data->datetime = $record['datetime'];
-        $data->extra = $record['extra'];
-        Manager::send($data);
-        return $this->getBubble();
+        if($this->isHandling($record)) {
+            $data = new Record();
+            $data->handlers = $this->handlers;
+            $data->message = $record['message'];
+            $data->context = $record['context'];
+            $data->level = $record['level_name'];
+            $data->datetime = $record['datetime'];
+            $data->extra = $record['extra'];
+            Manager::send($data);
+        }
+        return false === $this->bubble;
     }
 }

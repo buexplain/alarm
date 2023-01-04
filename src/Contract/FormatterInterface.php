@@ -10,5 +10,5 @@ namespace Alarm\Contract;
  */
 interface FormatterInterface
 {
-    public function format(Record $record);
+    public function format(Record $record): array;
 }
