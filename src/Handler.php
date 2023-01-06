@@ -18,9 +18,9 @@ class Handler extends AbstractHandler
     /**
      * @var array
      */
-    protected $handlers = [];
+    protected array $handlers = [];
 
-    public function __construct(array $handlers, $level = Logger::DEBUG, bool $bubble = true)
+    public function __construct(array $handlers, int $level = Logger::DEBUG, bool $bubble = true)
     {
         parent::__construct($level, $bubble);
         if (empty($handlers)) {
@@ -31,7 +31,7 @@ class Handler extends AbstractHandler
 
     public function handle(array $record): bool
     {
-        if($this->isHandling($record)) {
+        if ($this->isHandling($record)) {
             $data = new Record();
             $data->handlers = $this->handlers;
             $data->message = $record['message'];

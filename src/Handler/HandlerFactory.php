@@ -17,12 +17,12 @@ class HandlerFactory
     /**
      * @var ConfigInterface
      */
-    protected $config;
+    protected ConfigInterface $config;
 
     /**
      * @var array
      */
-    protected $pool = [];
+    protected array $pool = [];
 
     public function __construct(ConfigInterface $config)
     {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Alarm;
 
+use Alarm\Contract\InterfaceProcess;
 use Alarm\Contract\Manager;
 use Alarm\Contract\Record;
 use Alarm\Handler\HandlerFactory;
@@ -51,7 +52,7 @@ class Alarm extends AbstractProcess
     /**
      * @var HandlerFactory
      */
-    protected $handlerFactory;
+    protected HandlerFactory $handlerFactory;
 
     /**
      * @var null|Process
@@ -83,7 +84,8 @@ class Alarm extends AbstractProcess
                 $sock = $this->process->exportSocket();
 
                 $data = $sock->recv($this->recvLength, $this->recvTimeout);
-                if ($data === false && $sock->errCode !== SOCKET_ETIMEDOUT) {
+                //SOCKET_ETIMEDOUT 110
+                if ($data === false && $sock->errCode !== 110) {
                     $sock->close();
                     throw new SocketAcceptException('Socket is closed', $sock->errCode);
                 }
@@ -91,7 +93,7 @@ class Alarm extends AbstractProcess
                 /**
                  * @var Record $record
                  */
-                $record = unserialize((string) $data);
+                $record = unserialize((string)$data);
                 if ($record instanceof Record) {
                     foreach ($record->handlers as $name) {
                         try {
@@ -133,7 +135,7 @@ class Alarm extends AbstractProcess
     protected function bindServer(Server $server): void
     {
         /**
-         * @var $process SwooleProcess|swoole_process
+         * @var $process SwooleProcess|swoole_process|InterfaceProcess
          */
         $process = new Process(function (SwooleProcess $process) {
             try {
@@ -148,7 +150,8 @@ class Alarm extends AbstractProcess
                 CoordinatorManager::until(Constants::WORKER_EXIT)->resume();
                 sleep($this->restartInterval);
             }
-        }, false, SOCK_DGRAM, true);
+            // SOCK_DGRAM 2
+        }, false, 2, true);
         $server->addProcess($process);
         Manager::setProcess($process);
     }

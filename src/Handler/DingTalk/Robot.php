@@ -23,13 +23,13 @@ class Robot extends AbstractRobot
      * 机器人地址
      * @var string
      */
-    protected $url = '';
+    protected string $url = '';
 
     /**
      * 机器人安全码
      * @var string
      */
-    protected $secret = '';
+    protected string $secret = '';
 
     /**
      * Robot constructor.

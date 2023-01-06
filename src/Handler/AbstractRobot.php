@@ -27,28 +27,28 @@ abstract class AbstractRobot implements RobotInterface
     /**
      * @var ContainerInterface
      */
-    protected $container;
+    protected ContainerInterface $container;
 
     /**
      * @var ClientFactory
      */
-    protected $clientFactory;
+    protected ClientFactory $clientFactory;
 
     /**
      * @var FormatterInterface
      */
-    protected $formatter;
+    protected FormatterInterface $formatter;
 
     /**
      * @var Channel
      */
-    protected $ch;
+    protected Channel $ch;
 
     /**
      * 发送间隔
      * @var float
      */
-    protected $step = 3.0;
+    protected float $step = 3.0;
 
     /**
      * Robot constructor.
@@ -69,7 +69,7 @@ abstract class AbstractRobot implements RobotInterface
 
     public function push(Record $record): bool
     {
-        return (bool) $this->ch->push($record, 0.01);
+        return (bool)$this->ch->push($record, 0.01);
     }
 
     protected function pop()
@@ -79,7 +79,7 @@ abstract class AbstractRobot implements RobotInterface
             while (Manager::isRunning()) {
                 try {
                     $record = $this->ch->pop();
-                    if(!$record instanceof Record) {
+                    if (!$record instanceof Record) {
                         continue;
                     }
                     //每隔n秒发送一条数据，避免触发限制
@@ -92,14 +92,14 @@ abstract class AbstractRobot implements RobotInterface
                     try {
                         retry:
                         $this->send($record);
-                    }catch (WaitException $exception) {
+                    } catch (WaitException $exception) {
                         Coroutine::sleep($exception->getSecond());
                         goto retry;
-                    }catch (Throwable $throwable) {
+                    } catch (Throwable) {
                         //其它错误，不予考虑
                     }
                     $lastSendTime = time();
-                } catch (Throwable $throwable) {
+                } catch (Throwable) {
                     Coroutine::sleep(1);
                     continue;
                 }

@@ -16,14 +16,14 @@ use Throwable;
 class Process extends Base implements InterfaceProcess
 {
     /**
-     * @var Channel socket保护，避免多协程同时写，导致崩溃
+     * @var Channel|null socket保护，避免多协程同时写，导致崩溃
      */
-    protected $protectorCh;
+    protected ?Channel $protectorCh = null;
 
     /**
      * @var float
      */
-    protected static $sendTimeout = 0.01;
+    protected static float $sendTimeout = 0.01;
 
     public function __construct(callable $callback, bool $redirect_stdin_and_stdout = null, int $pipe_type = null, bool $enable_coroutine = null)
     {
@@ -56,12 +56,13 @@ class Process extends Base implements InterfaceProcess
                          */
                         $sock = $this->exportSocket();
                         $sendLen = $sock->send($data, self::$sendTimeout);
-                        if ($sendLen === false && $sock->errCode !== SOCKET_ETIMEDOUT) {
+                        // SOCKET_ETIMEDOUT 110
+                        if ($sendLen === false && $sock->errCode !== 110) {
                             $sock->close();
                             Coroutine::sleep(3);
                         }
                     }
-                } catch (Throwable $throwable) {
+                } catch (Throwable) {
                 }
             }
         });

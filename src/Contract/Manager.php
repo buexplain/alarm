@@ -13,12 +13,12 @@ class Manager
     /**
      * @var null|InterfaceProcess
      */
-    protected static $process;
+    protected static ?InterfaceProcess $process;
 
     /**
      * @var bool
      */
-    protected static $running = true;
+    protected static bool $running = true;
 
     public static function isRunning(): bool
     {

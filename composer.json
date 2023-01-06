@@ -7,9 +7,10 @@
     "hyperf",
     "alarm",
     "weChat",
-    "dingTalk"
+    "dingTalk",
+    "feiShu"
   ],
-  "description": "这个是一个基于hyperf的告警组件",
+  "description": "这个是一个基于hyperf(swoole驱动)的告警组件",
   "license": "Apache-2.0",
   "require": {
     "php": ">=8.0",

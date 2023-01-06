@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Alarm\Contract;
 
 use DateTime;
+use Monolog\DateTimeImmutable;
 use Psr\Log\LogLevel;
 
 /**
@@ -17,35 +18,35 @@ class Record
      * 本条日志需要被什么handler处理.
      * @var array
      */
-    public $handlers = [];
+    public array $handlers = [];
 
     /**
      * 日志信息.
      * @var string
      */
-    public $message = '';
+    public string $message = '';
 
     /**
      * 日志上下文.
      * @var array
      */
-    public $context = [];
+    public array $context = [];
 
     /**
      * 日志级别.
      * @var string
      */
-    public $level = LogLevel::DEBUG;
+    public string $level = LogLevel::DEBUG;
 
     /**
      * 日志时间.
-     * @var DateTime
+     * @var DateTime|DateTimeImmutable
      */
-    public $datetime;
+    public DateTime|DateTimeImmutable $datetime;
 
     /**
      * 日志扩展信息.
      * @var array
      */
-    public $extra = [];
+    public array $extra = [];
 }
