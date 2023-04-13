@@ -35,7 +35,7 @@ return [
                 'class' => RotatingFileHandler::class,
                 'constructor' => [
                     'filename' => BASE_PATH . '/runtime/logs/hyperf.log',
-                    'level'=>Logger::ERROR,
+                    'level'=>Level::Error,
                 ],
                 'formatter' => [
                     'class' => LineFormatter::class,
@@ -57,7 +57,7 @@ return [
                         'feiShu',
                     ],
                     //接收的日志级别
-                    'level'=>\Monolog\Logger::ERROR,
+                    'level'=>\Monolog\Level::Error,
                 ],
             ],
         ],
@@ -73,7 +73,7 @@ return [
                         'feiShu',
                     ],
                     //接收的日志级别
-                    'level'=>\Monolog\Logger::ERROR,
+                    'level'=>\Monolog\Level::Error,
                 ],
             ],
         ],

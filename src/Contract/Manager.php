@@ -30,12 +30,12 @@ class Manager
         static::$running = $running;
     }
 
-    public static function setProcess(InterfaceProcess $process)
+    public static function setProcess(InterfaceProcess $process): void
     {
         self::$process = $process;
     }
 
-    public static function send(Record $record, $timeout = 0.01)
+    public static function send(Record $record, $timeout = 0.01): void
     {
         if (self::$running) {
             self::$process->send($record, $timeout);

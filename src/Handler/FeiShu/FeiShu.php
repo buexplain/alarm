@@ -26,7 +26,7 @@ class FeiShu extends AbstractHandler
         }
         parent::__construct();
         foreach ($robots as $key => $robot) {
-            if (!isset($robot['url']) || empty($robot['url'])) {
+            if (empty($robot['url'])) {
                 throw new InvalidConfigException(sprintf('Parameter $robots[%d][\'url\'] is invalid.', $key));
             }
             if (!isset($robot['secret'])) {

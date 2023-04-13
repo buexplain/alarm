@@ -8,7 +8,8 @@ use Alarm\Contract\Manager;
 use Alarm\Contract\Record;
 use Alarm\Exception\InvalidConfigException;
 use Monolog\Handler\AbstractHandler;
-use Monolog\Logger;
+use Monolog\Level;
+use Monolog\LogRecord;
 
 /**
  * Class Handler.
@@ -20,7 +21,7 @@ class Handler extends AbstractHandler
      */
     protected array $handlers = [];
 
-    public function __construct(array $handlers, int $level = Logger::DEBUG, bool $bubble = true)
+    public function __construct(array $handlers, Level $level = Level::Debug, bool $bubble = true)
     {
         parent::__construct($level, $bubble);
         if (empty($handlers)) {
@@ -29,7 +30,7 @@ class Handler extends AbstractHandler
         $this->handlers = $handlers;
     }
 
-    public function handle(array $record): bool
+    public function handle(LogRecord $record): bool
     {
         if ($this->isHandling($record)) {
             $data = new Record();

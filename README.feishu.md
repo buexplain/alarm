@@ -17,7 +17,7 @@ return [
                         'feiShu', // 这里对应alarm.php配置的key
                     ],
                     //接收的日志级别
-                    'level'=>\Monolog\Logger::ERROR,
+                    'level'=>\Monolog\Level::Error,
                 ],
             ],
         ],
@@ -42,7 +42,7 @@ return [
                         'feiShuPost', // 这里对应alarm.php配置的key
                     ],
                     //接收的日志级别
-                    'level' => \Monolog\Logger::ERROR,
+                    'level' => \Monolog\Level::Error,
                 ],
             ],
         ],

@@ -8,13 +8,13 @@ use Alarm\Contract\InterfaceProcess;
 use Alarm\Contract\Manager;
 use Alarm\Contract\Record;
 use Alarm\Handler\HandlerFactory;
+use Hyperf\Coordinator\Constants;
+use Hyperf\Coordinator\CoordinatorManager;
 use Hyperf\Process\AbstractProcess;
 use Hyperf\Process\Event\AfterProcessHandle;
 use Hyperf\Process\Event\BeforeProcessHandle;
 use Hyperf\Process\Exception\ServerInvalidException;
 use Hyperf\Process\Exception\SocketAcceptException;
-use Hyperf\Utils\Coordinator\Constants;
-use Hyperf\Utils\Coordinator\CoordinatorManager;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -23,7 +23,6 @@ use Swoole\Coroutine\Socket;
 use Swoole\Process as SwooleProcess;
 use Swoole\Server;
 use Swoole\Timer;
-use swoole_process;
 use Throwable;
 
 /**
@@ -71,7 +70,8 @@ class Alarm extends AbstractProcess
 
     public function isEnable($server): bool
     {
-        return true;
+        //CYGWIN环境下禁止启动
+        return !str_starts_with(strtoupper(PHP_OS), 'CYGWIN');
     }
 
     public function handle(): void
@@ -135,7 +135,7 @@ class Alarm extends AbstractProcess
     protected function bindServer(Server $server): void
     {
         /**
-         * @var $process SwooleProcess|swoole_process|InterfaceProcess
+         * @var $process SwooleProcess|InterfaceProcess
          */
         $process = new Process(function (SwooleProcess $process) {
             try {

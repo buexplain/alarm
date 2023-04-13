@@ -10,7 +10,7 @@ use Alarm\Contract\Record;
 use Alarm\Contract\RobotInterface;
 use Alarm\Exception\WaitException;
 use Hyperf\Guzzle\ClientFactory;
-use Hyperf\Utils\ApplicationContext;
+use Hyperf\Context\ApplicationContext;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -69,7 +69,7 @@ abstract class AbstractRobot implements RobotInterface
 
     public function push(Record $record): bool
     {
-        return (bool)$this->ch->push($record, 0.01);
+        return $this->ch->push($record, 0.01);
     }
 
     protected function pop()
@@ -87,7 +87,7 @@ abstract class AbstractRobot implements RobotInterface
                     if ($diff >= 0 && $diff < $this->step) {
                         $diff = $this->step - $diff;
                         //echo '休眠--'.($diff < 1 ? 1 : $diff).PHP_EOL;
-                        Coroutine::sleep($diff < 1 ? 1 : $diff);
+                        Coroutine::sleep(max($diff, 1));
                     }
                     try {
                         retry:
