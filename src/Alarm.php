@@ -71,7 +71,8 @@ class Alarm extends AbstractProcess
     public function isEnable($server): bool
     {
         //CYGWIN环境下禁止启动
-        return !str_starts_with(strtoupper(PHP_OS), 'CYGWIN');
+        Manager::setRunning(!str_starts_with(strtoupper(PHP_OS), 'CYGWIN'));
+        return Manager::isRunning();
     }
 
     public function handle(): void
