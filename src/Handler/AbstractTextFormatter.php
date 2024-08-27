@@ -22,7 +22,6 @@ abstract class AbstractTextFormatter implements FormatterInterface
         $result = [
             'atMobiles' => [],
             'isAtAll' => false,
-            'content' => '',
         ];
 
         $context = $record->context;

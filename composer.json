@@ -7,14 +7,15 @@
     "hyperf",
     "alarm",
     "weChat",
-    "dingTalk"
+    "dingTalk",
+    "feiShu"
   ],
-  "description": "这个是一个基于hyperf的告警组件",
+  "description": "这个是一个基于hyperf(swoole驱动)的告警组件",
   "license": "Apache-2.0",
   "require": {
-    "php": ">=8.0",
+    "php": ">=8.1",
     "psr/log": "*",
-    "monolog/monolog": "*",
+    "monolog/monolog": "^3.0",
     "hyperf/contract": "^3.0",
     "hyperf/utils": "^3.0",
     "hyperf/guzzle": "^3.0",
@@ -29,7 +30,8 @@
   },
   "require-dev": {
     "swoole/ide-helper": "@dev",
-    "friendsofphp/php-cs-fixer": "^3.0"
+    "friendsofphp/php-cs-fixer": "^3.0",
+    "hyperf/signal": "@dev"
   },
   "extra": {
     "hyperf": {

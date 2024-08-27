@@ -18,9 +18,9 @@ abstract class AbstractHandler implements HandlerInterface
     /**
      * @var SplQueue
      */
-    protected $queue;
+    protected SplQueue $queue;
 
-    protected $count = 0;
+    protected int $count = 0;
 
     public function __construct()
     {

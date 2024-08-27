@@ -12,7 +12,7 @@ use RuntimeException;
  */
 class WaitException extends RuntimeException
 {
-    protected $second = 0;
+    protected int $second = 0;
 
     public function __construct(int $second)
     {

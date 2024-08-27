@@ -23,13 +23,13 @@ class Robot extends AbstractRobot
      * 机器人地址
      * @var string
      */
-    protected $url = '';
+    protected string $url = '';
 
     /**
      * 机器人安全码
      * @var string
      */
-    protected $secret = '';
+    protected string $secret = '';
 
     /**
      * Robot constructor.
@@ -80,7 +80,7 @@ class Robot extends AbstractRobot
                 }
                 //钉钉要求客户端等待指定秒数发送
                 if (isset($result['status']) && is_int($result['status']) && $result['status'] == 1111 && isset($result['wait']) && is_int($result['wait']) && $result['wait'] > 0) {
-                    throw new WaitException($result['wait'] <= 60 ? $result['wait'] : 60);
+                    throw new WaitException(min($result['wait'], 60));
                 }
             }
         }

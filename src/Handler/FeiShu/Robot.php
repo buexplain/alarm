@@ -23,15 +23,15 @@ class Robot extends AbstractRobot
      * 机器人地址
      * @var string
      */
-    protected $url = '';
+    protected string $url = '';
 
     /**
      * 机器人安全码
      * @var string
      */
-    protected $secret = '';
+    protected string $secret = '';
 
-    protected $limit_error_code = [
+    protected array $limit_error_code = [
         5000 => '内部错误，减少调用频率，稍后再试',
         55001 => '服务内部错误，减少调用频率，稍后再试',
         90217 => '请求太频繁，请降低请求调用频率',
@@ -68,7 +68,7 @@ class Robot extends AbstractRobot
                 'timestamp' => $timestamp,
                 'sign' => $signature,
             ]);
-            $url .= (strpos($url, '?') === false ? "?" : "&") . $query;
+            $url .= (!str_contains($url, '?') ? "?" : "&") . $query;
         }
         $body = $this->formatter->format($record);
         if (empty($body)) {
