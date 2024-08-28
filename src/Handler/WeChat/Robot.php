@@ -41,7 +41,7 @@ class Robot extends AbstractRobot
     /**
      * @throws Exception|GuzzleException
      */
-    protected function send(Record $record)
+    protected function send(Record $record): void
     {
         $response = $this->clientFactory->create()->post($this->url, [
             'headers' => [

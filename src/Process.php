@@ -30,7 +30,7 @@ class Process extends Base implements InterfaceProcess
         parent::__construct($callback, $redirect_stdin_and_stdout, $pipe_type, $enable_coroutine);
     }
 
-    public function send(Record $record, float $timeout = 0.01)
+    public function send(Record $record, float $timeout = 0.01): void
     {
         if (is_null($this->protectorCh)) {
             $this->init();
@@ -38,7 +38,7 @@ class Process extends Base implements InterfaceProcess
         $this->protectorCh->push($record, $timeout);
     }
 
-    protected function init()
+    protected function init(): void
     {
         $this->protectorCh = new Channel(20);
         Coroutine::create(function () {

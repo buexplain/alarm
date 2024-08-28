@@ -6,6 +6,7 @@ namespace Alarm\Handler\DingTalk;
 
 use Alarm\Exception\InvalidConfigException;
 use Alarm\Handler\AbstractHandler;
+use function Hyperf\Support\make;
 
 /**
  * Class DingTalk

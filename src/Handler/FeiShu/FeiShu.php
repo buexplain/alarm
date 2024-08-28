@@ -6,6 +6,7 @@ namespace Alarm\Handler\FeiShu;
 
 use Alarm\Exception\InvalidConfigException;
 use Alarm\Handler\AbstractHandler;
+use function Hyperf\Support\make;
 
 /**
  * Class FeiShu

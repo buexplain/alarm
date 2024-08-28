@@ -7,6 +7,7 @@ namespace Alarm\Handler;
 use Alarm\Contract\HandlerInterface;
 use Alarm\Exception\InvalidConfigException;
 use Hyperf\Contract\ConfigInterface;
+use function Hyperf\Support\make;
 
 /**
  * Class HandlerFactory

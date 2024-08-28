@@ -58,7 +58,7 @@ class Robot extends AbstractRobot
     /**
      * @throws Exception|GuzzleException
      */
-    protected function send(Record $record)
+    protected function send(Record $record): void
     {
         $url = $this->url;
         if (!empty($this->secret)) {

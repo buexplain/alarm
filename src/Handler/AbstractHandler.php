@@ -27,7 +27,7 @@ abstract class AbstractHandler implements HandlerInterface
         $this->queue = new SplQueue();
     }
 
-    public function send(Record $record)
+    public function send(Record $record): void
     {
         $i = $this->count;
         while ($i--) {
@@ -43,7 +43,7 @@ abstract class AbstractHandler implements HandlerInterface
         }
     }
 
-    final protected function enqueue(RobotInterface $handler)
+    final protected function enqueue(RobotInterface $handler): void
     {
         $this->queue->push($handler);
         $this->count += 1;

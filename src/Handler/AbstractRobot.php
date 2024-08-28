@@ -72,7 +72,7 @@ abstract class AbstractRobot implements RobotInterface
         return $this->ch->push($record, 0.01);
     }
 
-    protected function pop()
+    protected function pop(): void
     {
         Coroutine::create(function () {
             $lastSendTime = 0;
